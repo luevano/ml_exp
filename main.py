@@ -42,7 +42,7 @@ init()
 
 # Move to data folder.
 init_path = os.getcwd()
-os.chdir('../../data')
+os.chdir('data')
 data_path = os.getcwd()
 
 print(Fore.CYAN
