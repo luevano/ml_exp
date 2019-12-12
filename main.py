@@ -34,26 +34,21 @@ from do_ml import do_ml
 # Initialization time.
 init_time = time.perf_counter()
 
-# Move to data folder.
+# Data reading.
+tic = time.perf_counter()
+printc('Data reading started.', 'CYAN')
+
 init_path = os.getcwd()
 os.chdir('data')
 data_path = os.getcwd()
 
-printc('Data reading started.', 'CYAN')
-tic = time.perf_counter()
-
-# Read nuclear charge data.
 zi_data = read_nc_data(data_path)
-
-# Read molecule data.
 molecules, nuclear_charge, energy_pbe0, energy_delta = \
     read_db_edata(zi_data, data_path)
 
+os.chdir(init_path)
 toc = time.perf_counter()
 printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
-
-# Go back to main folder.
-os.chdir(init_path)
 
 # Matrices calculation.
 cm_data = c_matrix_multiple(molecules, nuclear_charge, as_eig=True)
