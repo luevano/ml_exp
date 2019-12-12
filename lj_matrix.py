@@ -31,7 +31,7 @@ def lj_matrix(mol_data,
               as_eig=False,
               bohr_radius_units=False):
     """
-    Creates the coulomb matrix from the molecule data given.
+    Creates the Lennard-Jones Matrix from the molecule data given.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
     max_len: maximum amount of atoms in molecule.
@@ -162,3 +162,22 @@ def lj_matrix(mol_data,
                 return np.sort(eig(lj)[0])[::-1]
             else:
                 return lj
+
+
+def c_matrix_multiple(mol_data,
+                      nc_data,
+                      max_len=25,
+                      as_eig=False,
+                      bohr_radius_units=False):
+    """
+    Calculates the Lennard-Jones Matrix of multiple molecules.
+    mol_data: molecule data, matrix of atom coordinates.
+    nc_data: nuclear charge data, array of atom data.
+    max_len: maximum amount of atoms in molecule.
+    as_eig: if data should be returned as matrix or array of eigenvalues.
+    bohr_radius_units: if units should be in bohr's radius units.
+    """
+    ljm_data = np.array([lj_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
+                        for mol, nc in zip(mol_data, nc_data)])
+
+    return ljm_data
