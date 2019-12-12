@@ -30,7 +30,6 @@ from c_matrix import c_matrix_multiple
 from lj_matrix import lj_matrix_multiple
 from do_ml import do_ml
 
-
 # Initialization time.
 init_time = time.perf_counter()
 
