@@ -89,7 +89,7 @@ def do_ml(desc_data,
 
     mae = np.mean(np.abs(Ycm_predicted - Ycm_test))
     if show_msgs:
-        print('\tMAE for {}: {}'.format(desc_type, mae))
+        print('\tMAE for {}: {:.4f}'.format(desc_type, mae))
 
     toc = time.perf_counter()
     tictoc = toc - tic
