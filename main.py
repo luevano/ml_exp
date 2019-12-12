@@ -36,6 +36,15 @@ from lj_matrix import lj_matrix
 from gauss_kernel import gauss_kernel
 from cholesky_solve import cholesky_solve
 
+
+def printc(text, color):
+    """
+    Prints texts normaly, but in color. Using colorama.
+    text: string with the text to print.
+    """
+    print(color + text + Style.RESET_ALL)
+
+
 # Initialization.
 init_time = time.perf_counter()
 init()
@@ -45,9 +54,7 @@ init_path = os.getcwd()
 os.chdir('data')
 data_path = os.getcwd()
 
-print(Fore.CYAN
-      + 'Data reading started.'
-      + Style.RESET_ALL)
+printc('Data reading started.', Fore.CYAN)
 tic = time.perf_counter()
 
 # Read nuclear charge data.
@@ -58,45 +65,35 @@ molecules, nuclear_charge, energy_pbe0, energy_delta = \
     read_db_edata(zi_data, data_path)
 
 toc = time.perf_counter()
-print(Fore.GREEN
-      + '\tData reading took {:.4f} seconds.'.format(toc-tic)
-      + Style.RESET_ALL)
+printc('\tData reading took {:.4f} seconds.'.format(toc-tic), Fore.GREEN)
 
 # Go back to main folder.
 os.chdir(init_path)
 
-print(Fore.CYAN
-      + 'Coulomb Matrices calculation started.'
-      + Style.RESET_ALL)
+printc('Coulomb Matrices calculation started.', Fore.CYAN)
 tic = time.perf_counter()
 
 cm_data = np.array([c_matrix(mol, nc, as_eig=True)
                     for mol, nc in zip(molecules, nuclear_charge)])
 
 toc = time.perf_counter()
-print(Fore.GREEN
-      + '\tCoulomb matrices calculation took {:.4f} seconds.'.format(toc-tic)
-      + Style.RESET_ALL)
+printc('\tCoulomb matrices calculation took {:.4f} seconds.'.format(toc-tic),
+       Fore.GREEN)
 
-print(Fore.CYAN
-      + 'L-J Matrices calculation started.'
-      + Style.RESET_ALL)
+printc('L-J Matrices calculation started.', Fore.CYAN)
 tic = time.perf_counter()
 
 ljm_data = np.array([lj_matrix(mol, nc, as_eig=True)
                      for mol, nc in zip(molecules, nuclear_charge)])
 
 toc = time.perf_counter()
-print(Fore.GREEN
-      + '\tL-J matrices calculation took {:.4f} seconds.'.format(toc-tic)
-      + Style.RESET_ALL)
+printc('\tL-J matrices calculation took {:.4f} seconds.'.format(toc-tic),
+       Fore.GREEN)
 
 #
 # Problem solving with Coulomb Matrix.
 #
-print(Fore.CYAN
-      + 'CM ML started.'
-      + Style.RESET_ALL)
+printc('CM ML started.', Fore.CYAN)
 tic = time.perf_counter()
 
 sigma = 1000.0
@@ -115,17 +112,13 @@ print('\tMean absolute error for CM: {}'.format(np.mean(np.abs(Ycm_predicted
                                                                - Ycm_test))))
 
 toc = time.perf_counter()
-print(Fore.GREEN
-      + '\tCM ML took {:.4f} seconds.'.format(toc-tic)
-      + Style.RESET_ALL)
+printc('\tCM ML took {:.4f} seconds.'.format(toc-tic), Fore.GREEN)
 
 
 #
 # Problem solving with L-J Matrix.
 #
-print(Fore.CYAN
-      + 'L-JM ML started.'
-      + Style.RESET_ALL)
+printc('L-JM ML started.', Fore.CYAN)
 tic = time.perf_counter()
 
 sigma = 1000.0
@@ -144,14 +137,10 @@ print('\tMean absolute error for LJM: {}'.format(np.mean(np.abs(Yljm_predicted
                                                                 - Yljm_test))))
 
 toc = time.perf_counter()
-print(Fore.GREEN
-      + '\tL-JM ML took {:.4f} seconds.'.format(toc-tic)
-      + Style.RESET_ALL)
+printc('\tL-JM ML took {:.4f} seconds.'.format(toc-tic), Fore.GREEN)
 
 
 # End of program
 end_time = time.perf_counter()
-print(Fore.CYAN
-      + 'The program took {:.4f} seconds of runtime.'.format(end_time
-                                                             - init_time)
-      + Style.RESET_ALL)
+printc('Program took {:.4f} seconds of runtime.'.format(end_time - init_time),
+       Fore.CYAN)
