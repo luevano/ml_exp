@@ -27,13 +27,13 @@ import numpy as np
 from numpy.linalg import eig
 
 
-def c_matrix(mol_data,
+def s_matrix(mol_data,
              nc_data,
              max_len=25,
              as_eig=False,
              bohr_radius_units=False):
     """
-    Creates the Coulomb Matrix from the molecule data given.
+    Creates the Sine Matrix from the molecule data given.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
     max_len: maximum amount of atoms in molecule.
@@ -58,7 +58,7 @@ def c_matrix(mol_data,
             max_len = None
 
         if max_len:
-            cm = np.zeros((max_len, max_len))
+            sm = np.zeros((max_len, max_len))
             ml_r = range(max_len)
 
             # Actual calculation of the coulomb matrix.
@@ -83,9 +83,9 @@ def c_matrix(mol_data,
                         z = (z_i-z_j)**2
 
                         if i == j:
-                            cm[i, j] = (0.5*Z_i**2.4)
+                            sm[i, j] = (0.5*Z_i**2.4)
                         else:
-                            cm[i, j] = (conversion_rate*Z_i*Z_j/math.sqrt(x
+                            sm[i, j] = (conversion_rate*Z_i*Z_j/math.sqrt(x
                                                                           + y
                                                                           + z))
                     else:
@@ -93,26 +93,26 @@ def c_matrix(mol_data,
 
             # Now the value will be returned.
             if as_eig:
-                cm_sorted = np.sort(eig(cm)[0])[::-1]
+                sm_sorted = np.sort(eig(sm)[0])[::-1]
                 # Thanks to SO for the following lines of code.
                 # https://stackoverflow.com/a/43011036
 
                 # Keep zeros at the end.
-                mask = cm_sorted != 0.
+                mask = sm_sorted != 0.
                 f_mask = mask.sum(0, keepdims=1) >\
-                    np.arange(cm_sorted.shape[0]-1, -1, -1)
+                    np.arange(sm_sorted.shape[0]-1, -1, -1)
 
                 f_mask = f_mask[::-1]
-                cm_sorted[f_mask] = cm_sorted[mask]
-                cm_sorted[~f_mask] = 0.
+                sm_sorted[f_mask] = sm_sorted[mask]
+                sm_sorted[~f_mask] = 0.
 
-                return cm_sorted
+                return sm_sorted
 
             else:
-                return cm
+                return sm
 
         else:
-            cm_temp = []
+            sm_temp = []
             # Actual calculation of the coulomb matrix.
             for i in mol_nr:
                 x_i = mol_data[i, 0]
@@ -120,7 +120,7 @@ def c_matrix(mol_data,
                 z_i = mol_data[i, 2]
                 Z_i = nc_data[i]
 
-                cm_row = []
+                sm_row = []
                 for j in mol_nr:
                     x_j = mol_data[j, 0]
                     y_j = mol_data[j, 1]
@@ -132,23 +132,23 @@ def c_matrix(mol_data,
                     z = (z_i-z_j)**2
 
                     if i == j:
-                        cm_row.append(0.5*Z_i**2.4)
+                        sm_row.append(0.5*Z_i**2.4)
                     else:
-                        cm_row.append(conversion_rate*Z_i*Z_j/math.sqrt(x
+                        sm_row.append(conversion_rate*Z_i*Z_j/math.sqrt(x
                                                                         + y
                                                                         + z))
 
-                cm_temp.append(np.array(cm_row))
+                sm_temp.append(np.array(sm_row))
 
-            cm = np.array(cm_temp)
+            sm = np.array(sm_temp)
             # Now the value will be returned.
             if as_eig:
-                return np.sort(eig(cm)[0])[::-1]
+                return np.sort(eig(sm)[0])[::-1]
             else:
-                return cm
+                return sm
 
 
-def c_matrix_multiple(mol_data,
+def s_matrix_multiple(mol_data,
                       nc_data,
                       max_len=25,
                       as_eig=False,
@@ -164,10 +164,10 @@ def c_matrix_multiple(mol_data,
     printc('Coulomb Matrices calculation started.', 'CYAN')
     tic = time.perf_counter()
 
-    cm_data = np.array([c_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
+    sm_data = np.array([s_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                        for mol, nc in zip(mol_data, nc_data)])
 
     toc = time.perf_counter()
-    printc('\tCM calculation took {:.4f} seconds.'.format(toc - tic), 'GREEN')
+    printc('\tSM calculation took {:.4f} seconds.'.format(toc - tic), 'GREEN')
 
-    return cm_data
+    return sm_data
