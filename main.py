@@ -33,8 +33,9 @@ from read_db_edata import read_db_edata
 from c_matrix import c_matrix
 from lj_matrix import lj_matrix
 # from frob_norm import frob_norm
-from gauss_kernel import gauss_kernel
-from cholesky_solve import cholesky_solve
+# from gauss_kernel import gauss_kernel
+# from cholesky_solve import cholesky_solve
+from do_ml import do_ml
 
 
 def printc(text, color):
@@ -90,55 +91,10 @@ toc = time.perf_counter()
 printc('\tL-J matrices calculation took {:.4f} seconds.'.format(toc-tic),
        Fore.GREEN)
 
-#
-# Problem solving with Coulomb Matrix.
-#
-printc('CM ML started.', Fore.CYAN)
-tic = time.perf_counter()
-
-sigma = 1000.0
-
-Xcm_training = cm_data[:6000]
-Ycm_training = energy_pbe0[:6000]
-Kcm_training = gauss_kernel(Xcm_training, Xcm_training, sigma)
-alpha_cm = cholesky_solve(Kcm_training, Ycm_training)
-
-Xcm_test = cm_data[-1000:]
-Ycm_test = energy_pbe0[-1000:]
-Kcm_test = gauss_kernel(Xcm_test, Xcm_training, sigma)
-Ycm_predicted = np.dot(Kcm_test, alpha_cm)
-
-print('\tMean absolute error for CM: {}'.format(np.mean(np.abs(Ycm_predicted
-                                                               - Ycm_test))))
-
-toc = time.perf_counter()
-printc('\tCM ML took {:.4f} seconds.'.format(toc-tic), Fore.GREEN)
-
-
-#
-# Problem solving with L-J Matrix.
-#
-printc('L-JM ML started.', Fore.CYAN)
-tic = time.perf_counter()
-
-sigma = 1000.0
-
-Xljm_training = ljm_data[:6000]
-Yljm_training = energy_pbe0[:6000]
-Kljm_training = gauss_kernel(Xljm_training, Xljm_training, sigma)
-alpha_ljm = cholesky_solve(Kljm_training, Yljm_training)
-
-Xljm_test = ljm_data[-1000:]
-Yljm_test = energy_pbe0[-1000:]
-Kljm_test = gauss_kernel(Xljm_test, Xljm_training, sigma)
-Yljm_predicted = np.dot(Kljm_test, alpha_ljm)
-
-print('\tMean absolute error for LJM: {}'.format(np.mean(np.abs(Yljm_predicted
-                                                                - Yljm_test))))
-
-toc = time.perf_counter()
-printc('\tL-JM ML took {:.4f} seconds.'.format(toc-tic), Fore.GREEN)
-
+# Coulomb Matrix ML
+do_ml(cm_data, 'CM', energy_pbe0, 1000, 100, 1000.0)
+# Lennard-Jones Matrix ML
+do_ml(ljm_data, 'L-JM', energy_pbe0, 1000, 100, 1000.0)
 
 # End of program
 end_time = time.perf_counter()
