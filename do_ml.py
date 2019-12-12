@@ -21,21 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import time
-from colorama import init, Fore, Style
+from misc import printc
 import numpy as np
 from gauss_kernel import gauss_kernel
 from cholesky_solve import cholesky_solve
-
-
-init()
-
-
-def printc(text, color):
-    """
-    Prints texts normaly, but in color. Using colorama.
-    text: string with the text to print.
-    """
-    print(color + text + Style.RESET_ALL)
 
 
 def do_ml(desc_data,
@@ -65,20 +54,19 @@ def do_ml(desc_data,
     e_len = len(energy_data)
     if d_len != e_len:
         printc(''.join(['ERROR. Descriptor data size different ',
-                        'than energy data size.']), Fore.RED)
+                        'than energy data size.']), 'RED')
         return None
 
     if training_size > d_len or test_size > d_len:
-        printc('ERROR. Training or test size greater than data size.',
-               Fore.RED)
+        printc('ERROR. Training or test size greater than data size.', 'RED')
         return None
 
     tic = time.perf_counter()
     if show_msgs:
-        printc('{} ML started, with parameters:'.format(desc_type), Fore.CYAN)
-        printc('\tTraining size: {}'.format(training_size), Fore.BLUE)
-        printc('\tTest size: {}'.format(test_size), Fore.BLUE)
-        printc('\tSigma: {}'.format(sigma), Fore.BLUE)
+        printc('{} ML started, with parameters:'.format(desc_type), 'CYAN')
+        printc('\tTraining size: {}'.format(training_size), 'BLUE')
+        printc('\tTest size: {}'.format(test_size), 'BLUE')
+        printc('\tSigma: {}'.format(sigma), 'BLUE')
 
     Xcm_training = desc_data[:training_size]
     Ycm_training = energy_data[:training_size]
@@ -98,6 +86,6 @@ def do_ml(desc_data,
     tictoc = toc - tic
     if show_msgs:
         printc('\t{} ML took {:.4f} seconds.'.format(desc_type, tictoc),
-               Fore.GREEN)
+               'GREEN')
 
     return mae, tictoc
