@@ -92,9 +92,9 @@ printc('\tL-J matrices calculation took {:.4f} seconds.'.format(toc-tic),
        Fore.GREEN)
 
 # Coulomb Matrix ML
-do_ml(cm_data, 'CM', energy_pbe0, 1000, 100, 1000.0)
+do_ml(cm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='CM')
 # Lennard-Jones Matrix ML
-do_ml(ljm_data, 'L-JM', energy_pbe0, 1000, 100, 1000.0)
+do_ml(ljm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='L-JM')
 
 # End of program
 end_time = time.perf_counter()
