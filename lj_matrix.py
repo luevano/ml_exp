@@ -20,6 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import time
+from misc import printc
 import math
 import numpy as np
 from numpy.linalg import eig
@@ -177,7 +179,13 @@ def lj_matrix_multiple(mol_data,
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
     """
+    printc('L-J Matrices calculation started.', 'CYAN')
+    tic = time.perf_counter()
+
     ljm_data = np.array([lj_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                         for mol, nc in zip(mol_data, nc_data)])
+
+    toc = time.perf_counter()
+    printc('\tL-JM calculation took {:.4f} seconds.'.format(toc-tic), 'GREEN')
 
     return ljm_data

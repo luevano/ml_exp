@@ -63,27 +63,12 @@ printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
 # Go back to main folder.
 os.chdir(init_path)
 
-printc('Coulomb Matrices calculation started.', 'CYAN')
-tic = time.perf_counter()
-
+# Matrices calculation.
 cm_data = c_matrix_multiple(molecules, nuclear_charge, as_eig=True)
-
-toc = time.perf_counter()
-printc('\tCoulomb matrices calculation took {:.4f} seconds.'.format(toc-tic),
-       'GREEN')
-
-printc('L-J Matrices calculation started.', 'CYAN')
-tic = time.perf_counter()
-
 ljm_data = lj_matrix_multiple(molecules, nuclear_charge, as_eig=True)
 
-toc = time.perf_counter()
-printc('\tL-J matrices calculation took {:.4f} seconds.'.format(toc-tic),
-       'GREEN')
-
-# Coulomb Matrix ML
+# ML calculation.
 do_ml(cm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='CM')
-# Lennard-Jones Matrix ML
 do_ml(ljm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='L-JM')
 
 # End of program

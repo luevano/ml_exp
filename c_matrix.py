@@ -20,6 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import time
+from misc import printc
 import math
 import numpy as np
 from numpy.linalg import eig
@@ -159,7 +161,13 @@ def c_matrix_multiple(mol_data,
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
     """
+    printc('Coulomb Matrices calculation started.', 'CYAN')
+    tic = time.perf_counter()
+
     cm_data = np.array([c_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                        for mol, nc in zip(mol_data, nc_data)])
+
+    toc = time.perf_counter()
+    printc('\tCM calculation took {:.4f} seconds.'.format(toc - tic), 'GREEN')
 
     return cm_data
