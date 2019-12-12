@@ -164,11 +164,11 @@ def lj_matrix(mol_data,
                 return lj
 
 
-def c_matrix_multiple(mol_data,
-                      nc_data,
-                      max_len=25,
-                      as_eig=False,
-                      bohr_radius_units=False):
+def lj_matrix_multiple(mol_data,
+                       nc_data,
+                       max_len=25,
+                       as_eig=False,
+                       bohr_radius_units=False):
     """
     Calculates the Lennard-Jones Matrix of multiple molecules.
     mol_data: molecule data, matrix of atom coordinates.
