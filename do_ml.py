@@ -58,6 +58,18 @@ def do_ml(desc_data,
     if not desc_type:
         desc_type = 'NOT SPECIFIED'
 
+    d_len = len(desc_data)
+    e_len = len(energy_data)
+    if d_len != e_len:
+        printc(''.join(['ERROR. Descriptor data size different ',
+                        'than energy data size.']), Fore.RED)
+        return None
+
+    if training_size > d_len or test_size > d_len:
+        printc('ERROR. Training or test size greater than data size.',
+               Fore.RED)
+        return None
+
     tic = time.perf_counter()
     if show_msgs:
         printc('{} ML started, with parameters:'.format(desc_type), Fore.CYAN)
