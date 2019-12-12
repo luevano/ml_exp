@@ -22,20 +22,12 @@ SOFTWARE.
 """
 import os
 import time
-# from colorama import init, Fore, Style
 from misc import printc
-# import math
-# import random
-# import numpy as np
-# from numpy.linalg import cholesky, eig
 # import matplotlib.pyplot as plt
 from read_nc_data import read_nc_data
 from read_db_edata import read_db_edata
 from c_matrix import c_matrix_multiple
 from lj_matrix import lj_matrix_multiple
-# from frob_norm import frob_norm
-# from gauss_kernel import gauss_kernel
-# from cholesky_solve import cholesky_solve
 from do_ml import do_ml
 
 
