@@ -21,10 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import time
-from colorama import Fore, Style
+from colorama import init, Fore, Style
 import numpy as np
 from gauss_kernel import gauss_kernel
 from cholesky_solve import cholesky_solve
+
+
+init()
 
 
 def printc(text, color):
