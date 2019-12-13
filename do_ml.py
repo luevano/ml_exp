@@ -30,19 +30,22 @@ from cholesky_solve import cholesky_solve
 def do_ml(desc_data,
           energy_data,
           training_size,
+          desc_type=None,
+          pipe=None,
           test_size=None,
           sigma=1000.0,
-          desc_type=None,
           show_msgs=True):
     """
     Does the ML methodology.
     desc_data: descriptor (or representation) data.
     energy_data: energy data associated with desc_data.
     training_size: size of the training set to use.
+    desc_type: string with the name of the descriptor used.
+    pipe: for multiprocessing purposes. Sends the data calculated
+        through a pipe.
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
     sigma: depth of the kernel.
-    desc_type: string with the name of the descriptor used.
     show_msgs: Show debug messages or not.
     NOTE: desc_type is just a string and is only for identification purposes.
     Also, training is done with the first part of the data and
@@ -69,10 +72,10 @@ def do_ml(desc_data,
 
     tic = time.perf_counter()
     if show_msgs:
-        printc('{} ML started, with parameters:'.format(desc_type), 'CYAN')
-        printc('\tTraining size: {}'.format(training_size), 'BLUE')
-        printc('\tTest size: {}'.format(test_size), 'BLUE')
-        printc('\tSigma: {}'.format(sigma), 'BLUE')
+        printc('{} ML started.'.format(desc_type), 'GREEN')
+        printc('\tTraining size: {}'.format(training_size), 'CYAN')
+        printc('\tTest size: {}'.format(test_size), 'CYAN')
+        printc('\tSigma: {}'.format(sigma), 'CYAN')
 
     Xcm_training = desc_data[:training_size]
     Ycm_training = energy_data[:training_size]
@@ -86,12 +89,18 @@ def do_ml(desc_data,
 
     mae = np.mean(np.abs(Ycm_predicted - Ycm_test))
     if show_msgs:
-        print('\tMAE for {}: {:.4f}'.format(desc_type, mae))
+        printc('\tMAE for {}: {:.4f}'.format(desc_type, mae), 'GREEN')
 
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
         printc('\t{} ML took {:.4f} seconds.'.format(desc_type, tictoc),
                'GREEN')
+        printc('\t\tTraining size: {}'.format(training_size), 'CYAN')
+        printc('\t\tTest size: {}'.format(test_size), 'CYAN')
+        printc('\t\tSigma: {}'.format(sigma), 'CYAN')
+
+    if pipe:
+        pipe.send([desc_type, training_size, test_size, sigma, mae, tictoc])
 
     return mae, tictoc

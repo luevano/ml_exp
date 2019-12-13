@@ -27,60 +27,73 @@ from misc import printc
 from read_qm7_data import read_qm7_data
 from c_matrix import c_matrix_multiple
 from lj_matrix import lj_matrix_multiple
-# from do_ml import do_ml
+from do_ml import do_ml
 
 
 # Test
 def main():
     # Initialization time.
     init_time = time.perf_counter()
-    procs = []
-    pipes = []
 
     # Data reading.
     zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta =\
         read_qm7_data()
 
     # Matrices calculation.
-    cm_recv, cm_send = Pipe()
-    pipes.append(cm_send)
+    procs = []
+    pipes = []
+
+    cm_recv, cm_send = Pipe(False)
     p1 = Process(target=c_matrix_multiple,
                  args=(molecules, nuclear_charge, cm_send))
     procs.append(p1)
+    pipes.append(cm_recv)
     p1.start()
 
-    ljm_recv, ljm_send = Pipe()
-    pipes.append(ljm_send)
+    ljm_recv, ljm_send = Pipe(False)
     p2 = Process(target=lj_matrix_multiple,
                  args=(molecules, nuclear_charge, ljm_send))
     procs.append(p2)
+    pipes.append(ljm_recv)
     p2.start()
 
-    cm_data = cm_recv.recv()
-    ljm_data = ljm_recv.recv()
+    cm_data = pipes[0].recv()
+    ljm_data = pipes[1].recv()
 
-    for pipe, proc in zip(pipes, procs):
-        pipe.close()
+    for proc in procs:
         proc.join()
 
-    print(type(cm_data), cm_data[0])
-    print(type(ljm_data), ljm_data[0])
-
-    """
     # ML calculation.
-    do_ml(cm_data,
-        energy_pbe0,
-        1000,
-        test_size=100,
-        sigma=1000.0,
-        desc_type='CM')
-    do_ml(ljm_data,
-        energy_pbe0,
-        1000,
-        test_size=100,
-        sigma=1000.0,
-        desc_type='L-JM')
-    """
+    procs = []
+    cm_pipes = []
+    ljm_pipes = []
+    for i in range(500, 1500 + 1, 500):
+        cm_recv, cm_send = Pipe(False)
+        p1 = Process(target=do_ml,
+                     args=(cm_data, energy_pbe0, i, 'CM', cm_send, 500))
+        procs.append(p1)
+        cm_pipes.append(cm_recv)
+        p1.start()
+
+        ljm_recv, ljm_send = Pipe(False)
+        p2 = Process(target=do_ml,
+                     args=(ljm_data, energy_pbe0, i, 'L-JM', ljm_send, 500))
+        procs.append(p2)
+        ljm_pipes.append(ljm_recv)
+        p2.start()
+
+    for proc in procs:
+        proc.join()
+
+    cm_bench_results = []
+    ljm_bench_results = []
+    for cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
+        cm_bench_results.append(cd_pipe.recv())
+        ljm_bench_results.append(ljd_pipe.recv())
+
+    for cm, ljm, in zip(cm_bench_results, ljm_bench_results):
+        print(cm)
+        print(ljm)
 
     # End of program
     end_time = time.perf_counter()

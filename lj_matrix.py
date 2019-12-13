@@ -188,10 +188,10 @@ def lj_matrix_multiple(mol_data,
     ljm_data = np.array([lj_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                         for mol, nc in zip(mol_data, nc_data)])
 
-    if pipe:
-        pipe.send(ljm_data)
-
     toc = time.perf_counter()
     printc('\tL-JM calculation took {:.4f} seconds.'.format(toc-tic), 'GREEN')
+
+    if pipe:
+        pipe.send(ljm_data)
 
     return ljm_data

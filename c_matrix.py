@@ -170,10 +170,10 @@ def c_matrix_multiple(mol_data,
     cm_data = np.array([c_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                        for mol, nc in zip(mol_data, nc_data)])
 
-    if pipe:
-        pipe.send(cm_data)
-
     toc = time.perf_counter()
     printc('\tCM calculation took {:.4f} seconds.'.format(toc - tic), 'GREEN')
+
+    if pipe:
+        pipe.send(cm_data)
 
     return cm_data
