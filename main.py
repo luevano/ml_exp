@@ -54,8 +54,18 @@ cm_data = c_matrix_multiple(molecules, nuclear_charge, as_eig=True)
 ljm_data = lj_matrix_multiple(molecules, nuclear_charge, as_eig=True)
 
 # ML calculation.
-do_ml(cm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='CM')
-do_ml(ljm_data, energy_pbe0, 1000, 100, sigma=1000.0, desc_type='L-JM')
+do_ml(cm_data,
+      energy_pbe0,
+      1000,
+      test_size=100,
+      sigma=1000.0,
+      desc_type='CM')
+do_ml(ljm_data,
+      energy_pbe0,
+      1000,
+      test_size=100,
+      sigma=1000.0,
+      desc_type='L-JM')
 
 # End of program
 end_time = time.perf_counter()
