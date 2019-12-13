@@ -30,7 +30,7 @@ from numpy.linalg import eig
 def c_matrix(mol_data,
              nc_data,
              max_len=25,
-             as_eig=False,
+             as_eig=True,
              bohr_radius_units=False):
     """
     Creates the Coulomb Matrix from the molecule data given.
@@ -150,13 +150,16 @@ def c_matrix(mol_data,
 
 def c_matrix_multiple(mol_data,
                       nc_data,
+                      pipe=None,
                       max_len=25,
-                      as_eig=False,
+                      as_eig=True,
                       bohr_radius_units=False):
     """
     Calculates the Coulomb Matrix of multiple molecules.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
+    pipe: for multiprocessing purposes. Sends the data calculated
+        through a pipe.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
@@ -166,6 +169,9 @@ def c_matrix_multiple(mol_data,
 
     cm_data = np.array([c_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                        for mol, nc in zip(mol_data, nc_data)])
+
+    if pipe:
+        pipe.send(cm_data)
 
     toc = time.perf_counter()
     printc('\tCM calculation took {:.4f} seconds.'.format(toc - tic), 'GREEN')

@@ -30,7 +30,7 @@ from numpy.linalg import eig
 def lj_matrix(mol_data,
               nc_data,
               max_len=25,
-              as_eig=False,
+              as_eig=True,
               bohr_radius_units=False):
     """
     Creates the Lennard-Jones Matrix from the molecule data given.
@@ -168,13 +168,16 @@ def lj_matrix(mol_data,
 
 def lj_matrix_multiple(mol_data,
                        nc_data,
+                       pipe=None,
                        max_len=25,
-                       as_eig=False,
+                       as_eig=True,
                        bohr_radius_units=False):
     """
     Calculates the Lennard-Jones Matrix of multiple molecules.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
+    pipe: for multiprocessing purposes. Sends the data calculated
+        through a pipe.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
@@ -184,6 +187,9 @@ def lj_matrix_multiple(mol_data,
 
     ljm_data = np.array([lj_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
                         for mol, nc in zip(mol_data, nc_data)])
+
+    if pipe:
+        pipe.send(ljm_data)
 
     toc = time.perf_counter()
     printc('\tL-JM calculation took {:.4f} seconds.'.format(toc-tic), 'GREEN')
