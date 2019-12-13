@@ -68,10 +68,9 @@ def do_ml(desc_data,
         return None
 
     if not test_size:
-        if d_len - training_size > 1500:
+        test_size = d_len - training_size
+        if test_size > 1500:
             test_size = 1500
-        else:
-            test_size = d_len - training_size
 
     tic = time.perf_counter()
     if show_msgs:
