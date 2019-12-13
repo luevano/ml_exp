@@ -82,18 +82,22 @@ def main():
         ljm_pipes.append(ljm_recv)
         p2.start()
 
-    for proc in procs:
-        proc.join()
-
     cm_bench_results = []
     ljm_bench_results = []
     for cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
         cm_bench_results.append(cd_pipe.recv())
         ljm_bench_results.append(ljd_pipe.recv())
 
-    for cm, ljm, in zip(cm_bench_results, ljm_bench_results):
-        print(cm)
-        print(ljm)
+    for proc in procs:
+        proc.join()
+
+    with open('benchmarks.csv', 'w') as save_file:
+        save_file.write('ml_type,tr_size,te_size,sigma,mae,time\n')
+        for cm, ljm, in zip(cm_bench_results, ljm_bench_results):
+            cm_text = ','.join([str(field) for field in cm]) + '\n'
+            ljm_text = ','.join([str(field) for field in ljm]) + '\n'
+            save_file.write(cm_text)
+            save_file.write(ljm_text)
 
     # End of program
     end_time = time.perf_counter()
