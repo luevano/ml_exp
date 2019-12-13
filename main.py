@@ -20,34 +20,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import os
 import time
 from misc import printc
 # import matplotlib.pyplot as plt
-from read_nc_data import read_nc_data
-from read_db_edata import read_db_edata
 from c_matrix import c_matrix_multiple
 from lj_matrix import lj_matrix_multiple
 from do_ml import do_ml
+from read_qm7_data import read_qm7_data
 
 # Initialization time.
 init_time = time.perf_counter()
 
 # Data reading.
-tic = time.perf_counter()
-printc('Data reading started.', 'CYAN')
-
-init_path = os.getcwd()
-os.chdir('data')
-data_path = os.getcwd()
-
-zi_data = read_nc_data(data_path)
-molecules, nuclear_charge, energy_pbe0, energy_delta = \
-    read_db_edata(zi_data, data_path)
-
-os.chdir(init_path)
-toc = time.perf_counter()
-printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
+zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta =\
+    read_qm7_data()
 
 # Matrices calculation.
 cm_data = c_matrix_multiple(molecules, nuclear_charge, as_eig=True)

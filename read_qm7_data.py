@@ -21,15 +21,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import os
+import time
 import numpy as np
 import random
+from misc import printc
+# 'periodic_table_of_elements.txt' retrieved from
+# https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee
+
+
+def read_nc_data(data_path):
+    """
+    Reads nuclear charge data from file and returns a dictionary.
+    data_path: path to the data directory.
+    """
+    fname = 'periodic_table_of_elements.txt'
+    with open(''.join([data_path, '\\', fname]), 'r') as infile:
+        temp_lines = infile.readlines()
+
+    del temp_lines[0]
+
+    lines = []
+    for temp_line in temp_lines:
+        new_line = temp_line.split(sep=',')
+        lines.append(new_line)
+
+    # Dictionary of nuclear charge.
+    return {line[2]: int(line[0]) for line in lines}
 
 
 # 'hof_qm7.txt.txt' retrieved from
 # https://github.com/qmlcode/tutorial
-def read_db_edata(zi_data,
-                  data_path,
-                  r_seed=111):
+def reas_db_data(zi_data,
+                 data_path,
+                 r_seed=111):
     """
     Reads molecule database and extracts
     its contents as usable variables.
@@ -96,3 +120,25 @@ def read_db_edata(zi_data,
                              for k in energy_temp_shuffled.keys()])
 
     return molecules, nuclear_charge, energy_pbe0, energy_delta
+
+
+def read_qm7_data():
+    """
+    Reads all the qm7 data.
+    """
+    tic = time.perf_counter()
+    printc('Data reading started.', 'CYAN')
+
+    init_path = os.getcwd()
+    os.chdir('data')
+    data_path = os.getcwd()
+
+    zi_data = read_nc_data(data_path)
+    molecules, nuclear_charge, energy_pbe0, energy_delta = \
+        reas_db_data(zi_data, data_path)
+
+    os.chdir(init_path)
+    toc = time.perf_counter()
+    printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
+
+    return zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta
