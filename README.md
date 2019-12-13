@@ -10,4 +10,4 @@ An implementation of existing representations (for now only Coulomb matrix), thi
 * The *QM9* dataset is obtained from the [quantum-machine webpage](http://www.quantum-machine.org/datasets/), but it's slightly modified for its use with python.
 * On the other hand, the *periodic table of elements* data was retrieved from [this handy Gist](https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee).
 
-*NOTE*: This is not supposed to be a python package (for now).
+*NOTE*: This is not supposed to be a python package (for now), but rather, the basis for future work. Please give credit if you use(d) the code presented here (contact me for more).
