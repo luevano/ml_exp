@@ -67,17 +67,17 @@ def main():
     procs = []
     cm_pipes = []
     ljm_pipes = []
-    for i in range(500, 1500 + 1, 500):
+    for i in range(2500, 6000 + 1, 500):
         cm_recv, cm_send = Pipe(False)
         p1 = Process(target=do_ml,
-                     args=(cm_data, energy_pbe0, i, 'CM', cm_send, 500))
+                     args=(cm_data, energy_pbe0, i, 'CM', cm_send))
         procs.append(p1)
         cm_pipes.append(cm_recv)
         p1.start()
 
         ljm_recv, ljm_send = Pipe(False)
         p2 = Process(target=do_ml,
-                     args=(ljm_data, energy_pbe0, i, 'L-JM', ljm_send, 500))
+                     args=(ljm_data, energy_pbe0, i, 'L-JM', ljm_send))
         procs.append(p2)
         ljm_pipes.append(ljm_recv)
         p2.start()
