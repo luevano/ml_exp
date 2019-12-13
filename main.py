@@ -23,10 +23,11 @@ SOFTWARE.
 import time
 from misc import printc
 # import matplotlib.pyplot as plt
+from read_qm7_data import read_qm7_data
 from c_matrix import c_matrix_multiple
 from lj_matrix import lj_matrix_multiple
 from do_ml import do_ml
-from read_qm7_data import read_qm7_data
+
 
 # Initialization time.
 init_time = time.perf_counter()
