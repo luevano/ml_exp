@@ -29,6 +29,8 @@ from numpy.linalg import eig
 
 def lj_matrix(mol_data,
               nc_data,
+              sigma=1.0,
+              epsilon=1.0,
               max_len=25,
               as_eig=True,
               bohr_radius_units=False):
@@ -92,11 +94,11 @@ def lj_matrix(mol_data,
                             # Conversion factor is included in r^2.
 
                             # 1/r^2
-                            r_2 = 1/(conversion_rate**2*(x + y + z))
+                            r_2 = sigma**2/(conversion_rate**2*(x + y + z))
 
                             r_6 = math.pow(r_2, 3)
                             r_12 = math.pow(r_6, 2)
-                            lj[i, j] = (4*(r_12 - r_6))
+                            lj[i, j] = (4*epsilon*(r_12 - r_6))
                     else:
                         break
 
@@ -150,11 +152,11 @@ def lj_matrix(mol_data,
                         # Conversion factor is included in r^2.
 
                         # 1/r^2
-                        r_2 = 1/(conversion_rate**2*(x + y + z))
+                        r_2 = sigma**2/(conversion_rate**2*(x + y + z))
 
                         r_6 = math.pow(r_2, 3)
                         r_12 = math.pow(r_6, 2)
-                        lj_row.append(4*(r_12 - r_6))
+                        lj_row.append(4*epsilon*(r_12 - r_6))
 
                 lj_temp.append(np.array(lj_row))
 
@@ -169,6 +171,8 @@ def lj_matrix(mol_data,
 def lj_matrix_multiple(mol_data,
                        nc_data,
                        pipe=None,
+                       sigma=1,
+                       epsilon=1,
                        max_len=25,
                        as_eig=True,
                        bohr_radius_units=False):
@@ -185,7 +189,13 @@ def lj_matrix_multiple(mol_data,
     printc('L-J Matrices calculation started.', 'CYAN')
     tic = time.perf_counter()
 
-    ljm_data = np.array([lj_matrix(mol, nc, max_len, as_eig, bohr_radius_units)
+    ljm_data = np.array([lj_matrix(mol,
+                                   nc,
+                                   sigma,
+                                   epsilon,
+                                   max_len,
+                                   as_eig,
+                                   bohr_radius_units)
                         for mol, nc in zip(mol_data, nc_data)])
 
     toc = time.perf_counter()

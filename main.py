@@ -43,37 +43,37 @@ def main():
     procs = []
     pipes = []
 
-    cm_recv, cm_send = Pipe(False)
-    p1 = Process(target=c_matrix_multiple,
-                 args=(molecules, nuclear_charge, cm_send))
-    procs.append(p1)
-    pipes.append(cm_recv)
-    p1.start()
+    # cm_recv, cm_send = Pipe(False)
+    # p1 = Process(target=c_matrix_multiple,
+    #              args=(molecules, nuclear_charge, cm_send))
+    # procs.append(p1)
+    # pipes.append(cm_recv)
+    # p1.start()
 
     ljm_recv, ljm_send = Pipe(False)
     p2 = Process(target=lj_matrix_multiple,
-                 args=(molecules, nuclear_charge, ljm_send))
+                 args=(molecules, nuclear_charge, ljm_send, 1.5))
     procs.append(p2)
     pipes.append(ljm_recv)
     p2.start()
 
-    cm_data = pipes[0].recv()
-    ljm_data = pipes[1].recv()
+    # cm_data = pipes[0].recv()
+    ljm_data = pipes[0].recv()
 
     for proc in procs:
         proc.join()
 
     # ML calculation.
     procs = []
-    cm_pipes = []
+    # cm_pipes = []
     ljm_pipes = []
-    for i in range(2500, 6000 + 1, 500):
-        cm_recv, cm_send = Pipe(False)
-        p1 = Process(target=do_ml,
-                     args=(cm_data, energy_pbe0, i, 'CM', cm_send))
-        procs.append(p1)
-        cm_pipes.append(cm_recv)
-        p1.start()
+    for i in range(1500, 6500 + 1, 500):
+        # cm_recv, cm_send = Pipe(False)
+        # p1 = Process(target=do_ml,
+        #              args=(cm_data, energy_pbe0, i, 'CM', cm_send))
+        # procs.append(p1)
+        # cm_pipes.append(cm_recv)
+        # p1.start()
 
         ljm_recv, ljm_send = Pipe(False)
         p2 = Process(target=do_ml,
@@ -82,21 +82,25 @@ def main():
         ljm_pipes.append(ljm_recv)
         p2.start()
 
-    cm_bench_results = []
+    # cm_bench_results = []
     ljm_bench_results = []
-    for cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
-        cm_bench_results.append(cd_pipe.recv())
+    for ljd_pipe in ljm_pipes:  # cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
+        # cm_bench_results.append(cd_pipe.recv())
         ljm_bench_results.append(ljd_pipe.recv())
 
     for proc in procs:
         proc.join()
 
-    with open('benchmarks.csv', 'w') as save_file:
-        save_file.write('ml_type,tr_size,te_size,sigma,mae,time\n')
-        for cm, ljm, in zip(cm_bench_results, ljm_bench_results):
-            cm_text = ','.join([str(field) for field in cm]) + '\n'
-            ljm_text = ','.join([str(field) for field in ljm]) + '\n'
-            save_file.write(cm_text)
+    with open('benchmarks.csv', 'a') as save_file:
+        # save_file.write(''.join(['ml_type,tr_size,te_size,kernel_s,',
+        #                          'mae,time,lj_s,lj_e,date_ran\n']))
+        date = '/'.join([str(field) for field in time.localtime()[:3][::-1]])
+        for ljm in ljm_bench_results:  # cm, ljm, in zip(cm_bench_results, ljm_bench_results):
+            # cm_text = ','.join([str(field) for field in cm])\
+            #     + ',' + date + '\n'
+            ljm_text = ','.join([str(field) for field in ljm])\
+                + ',1.5,1,' + date + '\n'
+            # save_file.write(cm_text)
             save_file.write(ljm_text)
 
     # End of program
