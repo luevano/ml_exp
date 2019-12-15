@@ -52,7 +52,7 @@ def main():
 
     ljm_recv, ljm_send = Pipe(False)
     p2 = Process(target=lj_matrix_multiple,
-                 args=(molecules, nuclear_charge, ljm_send, 1.5))
+                 args=(molecules, nuclear_charge, ljm_send))
     procs.append(p2)
     pipes.append(ljm_recv)
     p2.start()
@@ -99,7 +99,7 @@ def main():
             # cm_text = ','.join([str(field) for field in cm])\
             #     + ',' + date + '\n'
             ljm_text = ','.join([str(field) for field in ljm])\
-                + ',1.5,1,' + date + '\n'
+                + ',0.25,1,' + date + '\n'
             # save_file.write(cm_text)
             save_file.write(ljm_text)
 
