@@ -23,6 +23,7 @@ SOFTWARE.
 import time
 from multiprocessing import Process, Pipe
 # import matplotlib.pyplot as plt
+import pandas as pd
 from misc import printc
 from read_qm7_data import read_qm7_data
 from c_matrix import c_matrix_multiple
@@ -31,7 +32,10 @@ from do_ml import do_ml
 
 
 # Test
-def main():
+def ml():
+    """
+    Main function that does the whole ML process.
+    """
     # Initialization time.
     init_time = time.perf_counter()
 
@@ -109,5 +113,63 @@ def main():
            'CYAN')
 
 
+def pl():
+    """
+    Function for plotting the benchmarks.
+    """
+    or_cols = ['ml_type',
+               'tr_size',
+               'te_size',
+               'kernel_s',
+               'mae',
+               'time',
+               'lj_s',
+               'lj_e',
+               'date_ran']
+    dor_cols = ['te_size',
+                'kernel_s',
+                'time',
+                'date_ran']
+
+    data_temp = pd.read_csv('benchmarks.csv',)
+    data = pd.DataFrame(data_temp, columns=or_cols)
+    data = data.drop(columns=dor_cols)
+    # print(data)
+
+    first_data = pd.DataFrame(data, index=range(0, 22))
+    first_data = first_data.drop(columns=['lj_s', 'lj_e'])
+
+    fd_columns = ['ml_type', 'tr_size', 'mae']
+    first_data_cm = pd.DataFrame(columns=fd_columns)
+    first_data_ljm = pd.DataFrame(columns=fd_columns)
+    for i in range(first_data.shape[0]):
+        temp_df = first_data.iloc[[i]]
+        if first_data.at[i, 'ml_type'] == 'CM':
+            first_data_cm = first_data_cm.append(temp_df)
+        else:
+            first_data_ljm = first_data_ljm.append(temp_df)
+    first_data_cm = first_data_cm.drop(columns=['ml_type']).rename(columns={'mae': 'cm_mae'})
+    first_data_ljm = first_data_ljm.drop(columns=['ml_type']).rename(columns={'mae': 'ljm_mae'})
+    print(first_data_cm)
+    print(first_data_ljm)
+
+    cm_axis = first_data_cm.plot(x='tr_size',
+                                 y='cm_mae',
+                                 kind='line')
+    plot_axis = first_data_ljm.plot(ax=cm_axis,
+                                    x='tr_size',
+                                    y='ljm_mae',
+                                    kind='line')
+    plot_axis.set_xlabel('tr_size')
+    plot_axis.set_ylabel('mae')
+    plot_axis.set_title('mae for different tr_sizes')
+    plot_axis.get_figure().savefig('data\\figs\\mae_diff_tr_sizes.pdf')
+
+    new_data = data.drop(index=range(0, 22))
+    new_data = new_data.drop(columns=['ml_type'])
+    # print(new_data)
+
+
 if __name__ == '__main__':
-    main()
+    # ml()
+    pl()
