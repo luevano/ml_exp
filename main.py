@@ -117,6 +117,7 @@ def pl():
     """
     Function for plotting the benchmarks.
     """
+    # Original columns.
     or_cols = ['ml_type',
                'tr_size',
                'te_size',
@@ -126,20 +127,27 @@ def pl():
                'lj_s',
                'lj_e',
                'date_ran']
+    # Drop some original columns.
     dor_cols = ['te_size',
                 'kernel_s',
                 'time',
                 'date_ran']
 
-    data_temp = pd.read_csv('benchmarks.csv',)
+    # Read benchmarks data and drop some columns.
+    data_temp = pd.read_csv('data\\benchmarks.csv',)
     data = pd.DataFrame(data_temp, columns=or_cols)
     data = data.drop(columns=dor_cols)
-    # print(data)
 
+    # Get the data of the first benchmarks and drop unnecesary columns.
     first_data = pd.DataFrame(data, index=range(0, 22))
     first_data = first_data.drop(columns=['lj_s', 'lj_e'])
 
-    fd_columns = ['ml_type', 'tr_size', 'mae']
+    # Columns to keep temporarily.
+    fd_columns = ['ml_type',
+                  'tr_size',
+                  'mae']
+
+    # Create new dataframes for each matrix descriptor and fill them.
     first_data_cm = pd.DataFrame(columns=fd_columns)
     first_data_ljm = pd.DataFrame(columns=fd_columns)
     for i in range(first_data.shape[0]):
@@ -148,14 +156,20 @@ def pl():
             first_data_cm = first_data_cm.append(temp_df)
         else:
             first_data_ljm = first_data_ljm.append(temp_df)
-    first_data_cm = first_data_cm.drop(columns=['ml_type']).rename(columns={'mae': 'cm_mae'})
-    first_data_ljm = first_data_ljm.drop(columns=['ml_type']).rename(columns={'mae': 'ljm_mae'})
-    print(first_data_cm)
-    print(first_data_ljm)
 
+    # Drop unnecesary column and rename 'mae' for later use.
+    first_data_cm = first_data_cm.drop(columns=['ml_type'])\
+        .rename(columns={'mae': 'cm_mae'})
+    first_data_ljm = first_data_ljm.drop(columns=['ml_type'])\
+        .rename(columns={'mae': 'ljm_mae'})
+    # print(first_data_cm)
+    # print(first_data_ljm)
+
+    # Get the cm data axis so it can be joined with the ljm data axis.
     cm_axis = first_data_cm.plot(x='tr_size',
                                  y='cm_mae',
                                  kind='line')
+    # Get the ljm data axis and join it with the cm one.
     plot_axis = first_data_ljm.plot(ax=cm_axis,
                                     x='tr_size',
                                     y='ljm_mae',
@@ -163,11 +177,60 @@ def pl():
     plot_axis.set_xlabel('tr_size')
     plot_axis.set_ylabel('mae')
     plot_axis.set_title('mae for different tr_sizes')
-    plot_axis.get_figure().savefig('data\\figs\\mae_diff_tr_sizes.pdf')
+    # Get the figure and save it.
+    # plot_axis.get_figure().savefig('data\\figs\\mae_diff_tr_sizes.pdf')
 
+    # Get the rest of the benchmark data and drop unnecesary column.
     new_data = data.drop(index=range(0, 22))
     new_data = new_data.drop(columns=['ml_type'])
-    # print(new_data)
+
+    # Get the first set and rename it.
+    nd_first = first_data_ljm.rename(columns={'ljm_mae': '1, 1'})
+    ndf_axis = nd_first.plot(x='tr_size',
+                             y='1, 1',
+                             kind='line')
+    last_axis = ndf_axis
+    for i in range(22, 99, 11):
+        lj_s = new_data['lj_s'][i]
+        lj_e = new_data['lj_e'][i]
+        new_mae = '{}, {}'.format(lj_s, lj_e)
+        nd_temp = pd.DataFrame(new_data, index=range(i, i + 11))\
+            .drop(columns=['lj_s', 'lj_e'])\
+            .rename(columns={'mae': new_mae})
+        last_axis = nd_temp.plot(ax=last_axis,
+                                 x='tr_size',
+                                 y=new_mae,
+                                 kind='line')
+        print(nd_temp)
+
+    last_axis.set_xlabel('tr_size')
+    last_axis.set_ylabel('mae')
+    last_axis.set_title('mae for different parameters of lj(s)')
+
+    last_axis.get_figure().savefig('data\\figs\\mae_diff_param_lj_s.pdf')
+
+    ndf_axis = nd_first.plot(x='tr_size',
+                             y='1, 1',
+                             kind='line')
+    last_axis = ndf_axis
+    for i in range(99, data.shape[0], 11):
+        lj_s = new_data['lj_s'][i]
+        lj_e = new_data['lj_e'][i]
+        new_mae = '{}, {}'.format(lj_s, lj_e)
+        nd_temp = pd.DataFrame(new_data, index=range(i, i + 11))\
+            .drop(columns=['lj_s', 'lj_e'])\
+            .rename(columns={'mae': new_mae})
+        last_axis = nd_temp.plot(ax=last_axis,
+                                 x='tr_size',
+                                 y=new_mae,
+                                 kind='line')
+        print(nd_temp)
+
+    last_axis.set_xlabel('tr_size')
+    last_axis.set_ylabel('mae')
+    last_axis.set_title('mae for different parameters of lj(e)')
+
+    last_axis.get_figure().savefig('data\\figs\\mae_diff_param_lj_e.pdf')
 
 
 if __name__ == '__main__':
