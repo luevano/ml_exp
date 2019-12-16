@@ -95,7 +95,7 @@ def ml():
     for proc in procs:
         proc.join()
 
-    with open('benchmarks.csv', 'a') as save_file:
+    with open('data\\benchmarks.csv', 'a') as save_file:
         # save_file.write(''.join(['ml_type,tr_size,te_size,kernel_s,',
         #                          'mae,time,lj_s,lj_e,date_ran\n']))
         date = '/'.join([str(field) for field in time.localtime()[:3][::-1]])
