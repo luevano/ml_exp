@@ -178,7 +178,7 @@ def pl():
     plot_axis.set_ylabel('mae')
     plot_axis.set_title('mae for different tr_sizes')
     # Get the figure and save it.
-    # plot_axis.get_figure().savefig('data\\figs\\mae_diff_tr_sizes.pdf')
+    # plot_axis.get_figure().savefig('.figs\\mae_diff_tr_sizes.pdf')
 
     # Get the rest of the benchmark data and drop unnecesary column.
     new_data = data.drop(index=range(0, 22))
@@ -207,7 +207,7 @@ def pl():
     last_axis.set_ylabel('mae')
     last_axis.set_title('mae for different parameters of lj(s)')
 
-    last_axis.get_figure().savefig('data\\figs\\mae_diff_param_lj_s.pdf')
+    last_axis.get_figure().savefig('.figs\\mae_diff_param_lj_s.pdf')
 
     ndf_axis = nd_first.plot(x='tr_size',
                              y='1, 1',
@@ -230,7 +230,7 @@ def pl():
     last_axis.set_ylabel('mae')
     last_axis.set_title('mae for different parameters of lj(e)')
 
-    last_axis.get_figure().savefig('data\\figs\\mae_diff_param_lj_e.pdf')
+    last_axis.get_figure().savefig('.figs\\mae_diff_param_lj_e.pdf')
 
 
 if __name__ == '__main__':
