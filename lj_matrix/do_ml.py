@@ -21,10 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import time
-from misc import printc
 import numpy as np
-from gauss_kernel import gauss_kernel
-from cholesky_solve import cholesky_solve
+from lj_matrix.misc import printc
+from lj_matrix.gauss_kernel import gauss_kernel
+from lj_matrix.cholesky_solve import cholesky_solve
 
 
 def do_ml(desc_data,

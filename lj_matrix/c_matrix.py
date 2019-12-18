@@ -21,10 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import time
-from misc import printc
 import math
 import numpy as np
 from numpy.linalg import eig
+from lj_matrix.misc import printc
 
 
 def c_matrix(mol_data,

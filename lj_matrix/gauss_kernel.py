@@ -22,7 +22,7 @@ SOFTWARE.
 """
 import math
 import numpy as np
-from frob_norm import frob_norm
+from lj_matrix.frob_norm import frob_norm
 
 
 def gauss_kernel(X_1, X_2, sigma):
