@@ -24,11 +24,11 @@ import time
 from multiprocessing import Process, Pipe
 # import matplotlib.pyplot as plt
 import pandas as pd
-from lj_matrix.misc import printc
-from lj_matrix.read_qm7_data import read_qm7_data
-from lj_matrix.c_matrix import c_matrix_multiple
-from lj_matrix.lj_matrix import lj_matrix_multiple
-from lj_matrix.do_ml import do_ml
+from misc import printc
+from read_qm7_data import read_qm7_data
+from c_matrix import c_matrix_multiple
+from lj_matrix import lj_matrix_multiple
+from do_ml import do_ml
 
 
 # Test
@@ -235,4 +235,5 @@ def pl():
 
 if __name__ == '__main__':
     # ml()
-    pl()
+    # pl()
+    print('OK!')

@@ -23,8 +23,8 @@ SOFTWARE.
 import time
 from misc import printc
 import numpy as np
-from lj_matrix.gauss_kernel import gauss_kernel
-from lj_matrix.cholesky_solve import cholesky_solve
+from gauss_kernel import gauss_kernel
+from cholesky_solve import cholesky_solve
 
 
 def do_ml(desc_data,

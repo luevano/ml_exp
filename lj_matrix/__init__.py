@@ -20,3 +20,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from misc import printc
+from read_qm7_data import read_qm7_data, read_nc_data, reas_db_data
+from c_matrix import c_matrix, c_matrix_multiple
+from cholesky_solve import cholesky_solve
+from do_ml import do_ml
+from frob_norm import frob_norm
+from gauss_kernel import gauss_kernel
+from lj_matrix import lj_matrix, lj_matrix_multiple
+
+# If somebody does "from package import *", this is what they will
+# be able to access:
+__all__ = ['printc',
+           'read_qm7_data',
+           'read_nc_data',
+           'reas_db_data',
+           'c_matrix',
+           'c_matrix_multiple',
+           'cholesky_solve',
+           'do_ml',
+           'frob_norm',
+           'gauss_kernel',
+           'lj_matrix',
+           'lj_matrix_multiple']

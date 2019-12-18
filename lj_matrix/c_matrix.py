@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import time
-from lj_matrix.misc import printc
+from misc import printc
 import math
 import numpy as np
 from numpy.linalg import eig
