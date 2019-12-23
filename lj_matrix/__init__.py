@@ -20,7 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from lj_matrix.misc import printc
 from lj_matrix.read_qm7_data import read_nc_data, read_db_data, read_qm7_data
 from lj_matrix.c_matrix import c_matrix, c_matrix_multiple
 from lj_matrix.lj_matrix import lj_matrix, lj_matrix_multiple
@@ -33,8 +32,7 @@ from lj_matrix.parallel_create_matrices import parallel_create_matrices
 
 # If somebody does "from package import *", this is what they will
 # be able to access:
-__all__ = ['printc',
-           'read_nc_data',
+__all__ = ['read_nc_data',
            'read_db_data',
            'read_qm7_data',
            'c_matrix',
