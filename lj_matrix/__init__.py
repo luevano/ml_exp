@@ -28,6 +28,7 @@ from lj_matrix.frob_norm import frob_norm
 from lj_matrix.gauss_kernel import gauss_kernel
 from lj_matrix.cholesky_solve import cholesky_solve
 from lj_matrix.do_ml import do_ml
+from lj_matrix.parallel_create_matrices import parallel_create_matrices
 
 
 # If somebody does "from package import *", this is what they will
@@ -43,4 +44,5 @@ __all__ = ['printc',
            'frob_norm',
            'gauss_kernel',
            'cholesky_solve',
-           'do_ml']
+           'do_ml',
+           'parallel_create_matrices']
