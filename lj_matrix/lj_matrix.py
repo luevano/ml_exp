@@ -38,6 +38,8 @@ def lj_matrix(mol_data,
     Creates the Lennard-Jones Matrix from the molecule data given.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
+    sigma: sigma value.
+    epsilon: epsilon value.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
@@ -171,8 +173,8 @@ def lj_matrix(mol_data,
 def lj_matrix_multiple(mol_data,
                        nc_data,
                        pipe=None,
-                       sigma=1,
-                       epsilon=1,
+                       sigma=1.0,
+                       epsilon=1.0,
                        max_len=25,
                        as_eig=True,
                        bohr_radius_units=False):

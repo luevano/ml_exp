@@ -26,8 +26,7 @@ from multiprocessing import Process, Pipe
 import pandas as pd
 from lj_matrix.misc import printc
 from lj_matrix.read_qm7_data import read_qm7_data
-from lj_matrix.c_matrix import c_matrix_multiple
-from lj_matrix.lj_matrix import lj_matrix_multiple
+from lj_matrix.parallel_create_matrices import parallel_create_matrices
 from lj_matrix.do_ml import do_ml
 
 
@@ -40,32 +39,10 @@ def ml():
     init_time = time.perf_counter()
 
     # Data reading.
-    zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta =\
-        read_qm7_data()
+    molecules, nuclear_charge, energy_pbe0, energy_delta = read_qm7_data()
 
     # Matrices calculation.
-    procs = []
-    pipes = []
-
-    # cm_recv, cm_send = Pipe(False)
-    # p1 = Process(target=c_matrix_multiple,
-    #              args=(molecules, nuclear_charge, cm_send))
-    # procs.append(p1)
-    # pipes.append(cm_recv)
-    # p1.start()
-
-    ljm_recv, ljm_send = Pipe(False)
-    p2 = Process(target=lj_matrix_multiple,
-                 args=(molecules, nuclear_charge, ljm_send, 1, 0.25))
-    procs.append(p2)
-    pipes.append(ljm_recv)
-    p2.start()
-
-    # cm_data = pipes[0].recv()
-    ljm_data = pipes[0].recv()
-
-    for proc in procs:
-        proc.join()
+    cm_data, ljm_data = parallel_create_matrices(molecules, nuclear_charge)
 
     # ML calculation.
     procs = []
@@ -234,6 +211,6 @@ def pl():
 
 
 if __name__ == '__main__':
-    # ml()
+    ml()
     # pl()
     print('OK!')

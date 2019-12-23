@@ -51,7 +51,7 @@ def read_nc_data(data_path):
 
 # 'hof_qm7.txt.txt' retrieved from
 # https://github.com/qmlcode/tutorial
-def reas_db_data(zi_data,
+def read_db_data(zi_data,
                  data_path,
                  r_seed=111):
     """
@@ -135,10 +135,10 @@ def read_qm7_data():
 
     zi_data = read_nc_data(data_path)
     molecules, nuclear_charge, energy_pbe0, energy_delta = \
-        reas_db_data(zi_data, data_path)
+        read_db_data(zi_data, data_path)
 
     os.chdir(init_path)
     toc = time.perf_counter()
     printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
 
-    return zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta
+    return molecules, nuclear_charge, energy_pbe0, energy_delta

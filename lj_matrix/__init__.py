@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from lj_matrix.misc import printc
-from lj_matrix.read_qm7_data import read_nc_data, reas_db_data, read_qm7_data
+from lj_matrix.read_qm7_data import read_nc_data, read_db_data, read_qm7_data
 from lj_matrix.c_matrix import c_matrix, c_matrix_multiple
 from lj_matrix.lj_matrix import lj_matrix, lj_matrix_multiple
 from lj_matrix.frob_norm import frob_norm
@@ -34,7 +34,7 @@ from lj_matrix.do_ml import do_ml
 # be able to access:
 __all__ = ['printc',
            'read_nc_data',
-           'reas_db_data',
+           'read_db_data',
            'read_qm7_data',
            'c_matrix',
            'c_matrix_multiple',
