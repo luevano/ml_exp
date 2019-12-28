@@ -20,74 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import time
-from multiprocessing import Process, Pipe
-# import matplotlib.pyplot as plt
 import pandas as pd
-from lj_matrix.misc import printc
-from lj_matrix.read_qm7_data import read_qm7_data
-from lj_matrix.parallel_create_matrices import parallel_create_matrices
 from lj_matrix.do_ml import do_ml
-
-
-# Test
-def ml():
-    """
-    Main function that does the whole ML process.
-    """
-    # Initialization time.
-    init_time = time.perf_counter()
-
-    # Data reading.
-    molecules, nuclear_charge, energy_pbe0, energy_delta = read_qm7_data()
-
-    # Matrices calculation.
-    cm_data, ljm_data = parallel_create_matrices(molecules, nuclear_charge)
-
-    # ML calculation.
-    procs = []
-    # cm_pipes = []
-    ljm_pipes = []
-    for i in range(1500, 6500 + 1, 500):
-        # cm_recv, cm_send = Pipe(False)
-        # p1 = Process(target=do_ml,
-        #              args=(cm_data, energy_pbe0, i, 'CM', cm_send))
-        # procs.append(p1)
-        # cm_pipes.append(cm_recv)
-        # p1.start()
-
-        ljm_recv, ljm_send = Pipe(False)
-        p2 = Process(target=do_ml,
-                     args=(ljm_data, energy_pbe0, i, 'L-JM', ljm_send))
-        procs.append(p2)
-        ljm_pipes.append(ljm_recv)
-        p2.start()
-
-    # cm_bench_results = []
-    ljm_bench_results = []
-    for ljd_pipe in ljm_pipes:  # cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
-        # cm_bench_results.append(cd_pipe.recv())
-        ljm_bench_results.append(ljd_pipe.recv())
-
-    for proc in procs:
-        proc.join()
-
-    with open('data\\benchmarks.csv', 'a') as save_file:
-        # save_file.write(''.join(['ml_type,tr_size,te_size,kernel_s,',
-        #                          'mae,time,lj_s,lj_e,date_ran\n']))
-        date = '/'.join([str(field) for field in time.localtime()[:3][::-1]])
-        for ljm in ljm_bench_results:  # cm, ljm, in zip(cm_bench_results, ljm_bench_results):
-            # cm_text = ','.join([str(field) for field in cm])\
-            #     + ',' + date + '\n'
-            ljm_text = ','.join([str(field) for field in ljm])\
-                + ',1,0.25,' + date + '\n'
-            # save_file.write(cm_text)
-            save_file.write(ljm_text)
-
-    # End of program
-    end_time = time.perf_counter()
-    printc('Program took {:.4f} seconds.'.format(end_time - init_time),
-           'CYAN')
 
 
 def pl():
@@ -211,6 +145,6 @@ def pl():
 
 
 if __name__ == '__main__':
-    ml()
+    do_ml(min_training_size=1500, max_training_size=3000)
     # pl()
     print('OK!')

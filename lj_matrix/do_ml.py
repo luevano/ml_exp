@@ -113,7 +113,7 @@ def ml(desc_data,
 
 def do_ml(min_training_size,
           max_training_size=None,
-          training_increment_size=None,
+          training_increment_size=500,
           ljm_sigma=1.0,
           ljm_epsilon=1.0,
           save_benchmarks=False,
@@ -138,6 +138,8 @@ def do_ml(min_training_size,
     """
     # Initialization time.
     init_time = time.perf_counter()
+    if not max_training_size:
+        max_training_size = min_training_size + training_increment_size
 
     # Data reading.
     molecules, nuclear_charge, energy_pbe0, energy_delta = read_qm7_data()
