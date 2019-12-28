@@ -28,6 +28,7 @@ from lj_matrix.gauss_kernel import gauss_kernel
 from lj_matrix.cholesky_solve import cholesky_solve
 from lj_matrix.do_ml import do_ml
 from lj_matrix.parallel_create_matrices import parallel_create_matrices
+from lj_matrix.misc import plot_benchmarks
 
 
 # If somebody does "from package import *", this is what they will
@@ -43,4 +44,5 @@ __all__ = ['read_nc_data',
            'gauss_kernel',
            'cholesky_solve',
            'do_ml',
-           'parallel_create_matrices']
+           'parallel_create_matrices',
+           'plot_benchmarks']
