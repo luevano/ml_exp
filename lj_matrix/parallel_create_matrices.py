@@ -27,8 +27,9 @@ from lj_matrix.lj_matrix import lj_matrix_multiple
 
 def parallel_create_matrices(mol_data,
                              nc_data,
-                             sigma=1.0,
-                             epsilon=1.0,
+                             ljm_diag_value=None,
+                             ljm_sigma=1.0,
+                             ljm_epsilon=1.0,
                              max_len=25,
                              as_eig=True,
                              bohr_radius_units=False):
@@ -36,8 +37,9 @@ def parallel_create_matrices(mol_data,
     Creates the Coulomb and L-J matrices in parallel.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
-    sigma: sigma value for L-J matrix.
-    epsilon: epsilon value for L-J matrix.
+    ljm_diag_value: if special diagonal value is to be used for lj matrix.
+    ljm_sigma: sigma value for lj matrix.
+    ljm_epsilon: psilon value for lj matrix.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
@@ -49,14 +51,27 @@ def parallel_create_matrices(mol_data,
 
     cm_recv, cm_send = Pipe(False)
     p1 = Process(target=c_matrix_multiple,
-                 args=(mol_data, nc_data, cm_send))
+                 args=(mol_data,
+                       nc_data,
+                       cm_send,
+                       max_len,
+                       as_eig,
+                       bohr_radius_units))
     procs.append(p1)
     pipes.append(cm_recv)
     p1.start()
 
     ljm_recv, ljm_send = Pipe(False)
     p2 = Process(target=lj_matrix_multiple,
-                 args=(mol_data, nc_data, ljm_send, sigma, epsilon))
+                 args=(mol_data,
+                       nc_data,
+                       ljm_send,
+                       ljm_diag_value,
+                       ljm_sigma,
+                       ljm_epsilon,
+                       max_len,
+                       as_eig,
+                       bohr_radius_units))
     procs.append(p2)
     pipes.append(ljm_recv)
     p2.start()

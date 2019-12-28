@@ -29,6 +29,7 @@ from lj_matrix.misc import printc
 
 def lj_matrix(mol_data,
               nc_data,
+              diag_value=None,
               sigma=1.0,
               epsilon=1.0,
               max_len=25,
@@ -38,6 +39,7 @@ def lj_matrix(mol_data,
     Creates the Lennard-Jones Matrix from the molecule data given.
     mol_data: molecule data, matrix of atom coordinates.
     nc_data: nuclear charge data, array of atom data.
+    diag_value: if special diagonal value is to be used.
     sigma: sigma value.
     epsilon: epsilon value.
     max_len: maximum amount of atoms in molecule.
@@ -86,7 +88,10 @@ def lj_matrix(mol_data,
                         z = (z_i-z_j)**2
 
                         if i == j:
-                            lj[i, j] = (0.5*Z_i**2.4)
+                            if not diag_value:
+                                lj[i, j] = (0.5*Z_i**2.4)
+                            else:
+                                lj[i, j] = diag_value
                         else:
                             # Calculations are done after i==j is checked
                             # so no division by zero is done.
@@ -144,7 +149,10 @@ def lj_matrix(mol_data,
                     z = (z_i-z_j)**2
 
                     if i == j:
-                        lj_row.append(0.5*Z_i**2.4)
+                        if not diag_value:
+                            lj_row.append(0.5*Z_i**2.4)
+                        else:
+                            lj_row.append(diag_value)
                     else:
                         # Calculations are done after i==j is checked
                         # so no division by zero is done.
@@ -173,6 +181,7 @@ def lj_matrix(mol_data,
 def lj_matrix_multiple(mol_data,
                        nc_data,
                        pipe=None,
+                       diag_value=None,
                        sigma=1.0,
                        epsilon=1.0,
                        max_len=25,
@@ -184,6 +193,9 @@ def lj_matrix_multiple(mol_data,
     nc_data: nuclear charge data, array of atom data.
     pipe: for multiprocessing purposes. Sends the data calculated
         through a pipe.
+    diag_value: if special diagonal value is to be used.
+    sigma: sigma value.
+    epsilon: epsilon value.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
     bohr_radius_units: if units should be in bohr's radius units.
@@ -193,6 +205,7 @@ def lj_matrix_multiple(mol_data,
 
     ljm_data = np.array([lj_matrix(mol,
                                    nc,
+                                   diag_value,
                                    sigma,
                                    epsilon,
                                    max_len,

@@ -114,6 +114,7 @@ def ml(desc_data,
 def do_ml(min_training_size,
           max_training_size=None,
           training_increment_size=500,
+          ljm_diag_value=None,
           ljm_sigma=1.0,
           ljm_epsilon=1.0,
           save_benchmarks=False,
@@ -127,6 +128,7 @@ def do_ml(min_training_size,
     min_training_size: minimum training size.
     max_training_size: maximum training size.
     training_increment_size: training increment size.
+    ljm_diag_value: if a special diagonal value should be used in lj matrix.
     ljm_sigma: sigma value for lj matrix.
     ljm_epsilon: epsilon value for lj matrix.
     save_benchmarks: if benchmarks should be saved.
@@ -147,6 +149,7 @@ def do_ml(min_training_size,
     # Matrices calculation.
     cm_data, ljm_data = parallel_create_matrices(molecules,
                                                  nuclear_charge,
+                                                 ljm_diag_value,
                                                  ljm_sigma,
                                                  ljm_epsilon,
                                                  max_len,
