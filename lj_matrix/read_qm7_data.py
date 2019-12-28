@@ -59,7 +59,7 @@ def read_db_data(zi_data,
     its contents as usable variables.
     zi_data: dictionary containing nuclear charge data.
     data_path: path to the data directory.
-    r_seed: random seed.
+    r_seed: random seed to use for the shuffling.
     """
     os.chdir(data_path)
 
@@ -122,9 +122,10 @@ def read_db_data(zi_data,
     return molecules, nuclear_charge, energy_pbe0, energy_delta
 
 
-def read_qm7_data():
+def read_qm7_data(r_seed=111):
     """
     Reads all the qm7 data.
+    r_seed: random seed to use for the shuffling.
     """
     tic = time.perf_counter()
     printc('Data reading started.', 'CYAN')
@@ -135,7 +136,7 @@ def read_qm7_data():
 
     zi_data = read_nc_data(data_path)
     molecules, nuclear_charge, energy_pbe0, energy_delta = \
-        read_db_data(zi_data, data_path)
+        read_db_data(zi_data, data_path, r_seed)
 
     os.chdir(init_path)
     toc = time.perf_counter()

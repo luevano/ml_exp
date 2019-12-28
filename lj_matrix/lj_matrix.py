@@ -88,7 +88,7 @@ def lj_matrix(mol_data,
                         z = (z_i-z_j)**2
 
                         if i == j:
-                            if not diag_value:
+                            if diag_value is None:
                                 lj[i, j] = (0.5*Z_i**2.4)
                             else:
                                 lj[i, j] = diag_value

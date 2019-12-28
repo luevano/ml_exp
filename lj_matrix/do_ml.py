@@ -118,6 +118,7 @@ def do_ml(min_training_size,
           ljm_diag_value=None,
           ljm_sigma=1.0,
           ljm_epsilon=1.0,
+          r_seed=111,
           save_benchmarks=False,
           max_len=25,
           as_eig=True,
@@ -134,6 +135,7 @@ def do_ml(min_training_size,
     ljm_diag_value: if a special diagonal value should be used in lj matrix.
     ljm_sigma: sigma value for lj matrix.
     ljm_epsilon: epsilon value for lj matrix.
+    r_seed: random seed to use for the shuffling.
     save_benchmarks: if benchmarks should be saved.
     max_len: maximum amount of atoms in molecule.
     as_eig: if data should be returned as matrix or array of eigenvalues.
@@ -147,7 +149,8 @@ def do_ml(min_training_size,
         max_training_size = min_training_size + training_increment_size
 
     # Data reading.
-    molecules, nuclear_charge, energy_pbe0, energy_delta = read_qm7_data()
+    molecules, nuclear_charge, energy_pbe0, energy_delta =\
+        read_qm7_data(r_seed)
 
     # Matrices calculation.
     cm_data, ljm_data = parallel_create_matrices(molecules,

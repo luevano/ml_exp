@@ -31,6 +31,7 @@ if __name__ == '__main__':
           ljm_diag_value=None,
           ljm_sigma=1.0,
           ljm_epsilon=1.0,
+          r_seed=111,
           save_benchmarks=False,
           show_msgs=True)
     # plot_benchmarks()
