@@ -114,6 +114,7 @@ def ml(desc_data,
 def do_ml(min_training_size,
           max_training_size=None,
           training_increment_size=500,
+          test_size=None,
           ljm_diag_value=None,
           ljm_sigma=1.0,
           ljm_epsilon=1.0,
@@ -128,6 +129,8 @@ def do_ml(min_training_size,
     min_training_size: minimum training size.
     max_training_size: maximum training size.
     training_increment_size: training increment size.
+    test_size: size of the test set to use. If no size is given,
+        the last remaining molecules are used.
     ljm_diag_value: if a special diagonal value should be used in lj matrix.
     ljm_sigma: sigma value for lj matrix.
     ljm_epsilon: epsilon value for lj matrix.
@@ -170,7 +173,7 @@ def do_ml(min_training_size,
                            i,
                            'CM',
                            cm_send,
-                           max_training_size,
+                           test_size,
                            sigma,
                            show_msgs))
         procs.append(p1)
@@ -184,7 +187,7 @@ def do_ml(min_training_size,
                            i,
                            'L-JM',
                            ljm_send,
-                           max_training_size,
+                           test_size,
                            sigma,
                            show_msgs))
         procs.append(p2)

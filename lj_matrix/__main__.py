@@ -24,6 +24,14 @@ from lj_matrix.do_ml import do_ml
 # from lj_matrix.misc import plot_benchmarks
 
 if __name__ == '__main__':
-    do_ml(min_training_size=1500, max_training_size=3000)
+    do_ml(min_training_size=1500,
+          max_training_size=2000,
+          training_increment_size=500,
+          test_size=None,
+          ljm_diag_value=None,
+          ljm_sigma=1.0,
+          ljm_epsilon=1.0,
+          save_benchmarks=False,
+          show_msgs=True)
     # plot_benchmarks()
     print('OK!')
