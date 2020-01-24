@@ -1,4 +1,4 @@
-# lj_exp
+# ml_exp
 
 This is an exploration of ML models for use in prediction of atomization energies (and possibly other properties) of molecules using Machine Learning (ML).
 
