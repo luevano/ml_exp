@@ -20,10 +20,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from ml_exp.do_ml import do_ml
+# from ml_exp.do_ml import do_ml
 # from ml_exp.misc import plot_benchmarks
+from ml_exp.read_qm7_data import read_qm7_data
+from ml_exp.adj_matrix import fneig_matrix, adj_matrix
 
 if __name__ == '__main__':
+    """
     do_ml(min_training_size=1500,
           max_training_size=2000,
           training_increment_size=500,
@@ -34,5 +37,15 @@ if __name__ == '__main__':
           r_seed=111,
           save_benchmarks=False,
           show_msgs=True)
+    """
     # plot_benchmarks()
+    xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
+    for i in range(1):
+        fnm, bonds = fneig_matrix(atoms[i], xyz[i])
+        am = adj_matrix(bonds)
+
+        print(f'{i} first neighbor matrix\n{fnm}')
+        print(f'{i} bond list\n{bonds}')
+        print(f'{i} adjacency matrix\n{am}')
+        print('-'*30)
     print('OK!')
