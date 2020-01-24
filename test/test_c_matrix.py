@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import unittest
-from lj_matrix.c_matrix import c_matrix
+from ml_exp.c_matrix import c_matrix
 
 
 class TestCMatrix(unittest.TestCase):

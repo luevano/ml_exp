@@ -23,11 +23,11 @@ SOFTWARE.
 import time
 import numpy as np
 from multiprocessing import Process, Pipe
-from lj_matrix.misc import printc
-from lj_matrix.gauss_kernel import gauss_kernel
-from lj_matrix.cholesky_solve import cholesky_solve
-from lj_matrix.read_qm7_data import read_qm7_data
-from lj_matrix.parallel_create_matrices import parallel_create_matrices
+from ml_exp.misc import printc
+from ml_exp.gauss_kernel import gauss_kernel
+from ml_exp.cholesky_solve import cholesky_solve
+from ml_exp.read_qm7_data import read_qm7_data
+from ml_exp.parallel_create_matrices import parallel_create_matrices
 
 
 def ml(desc_data,

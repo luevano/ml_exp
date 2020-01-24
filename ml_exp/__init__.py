@@ -20,30 +20,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import math
-import numpy as np
-from lj_matrix.frob_norm import frob_norm
+from ml_exp.read_qm7_data import read_nc_data, read_db_data, read_qm7_data
+from ml_exp.c_matrix import c_matrix, c_matrix_multiple
+from ml_exp.lj_matrix import lj_matrix, lj_matrix_multiple
+from ml_exp.frob_norm import frob_norm
+from ml_exp.gauss_kernel import gauss_kernel
+from ml_exp.cholesky_solve import cholesky_solve
+from ml_exp.do_ml import do_ml
+from ml_exp.parallel_create_matrices import parallel_create_matrices
+from ml_exp.misc import plot_benchmarks
 
 
-def gauss_kernel(X_1, X_2, sigma):
-    """
-    Calculates the Gaussian Kernel.
-    X_1: first representations.
-    X_2: second representations.
-    sigma: kernel width.
-    """
-    x1_l = len(X_1)
-    x1_range = range(x1_l)
-    x2_l = len(X_2)
-    x2_range = range(x2_l)
-
-    inv_sigma = -0.5 / (sigma*sigma)
-
-    K = np.zeros((x1_l, x2_l))
-    for i in x1_range:
-        for j in x2_range:
-            f_norm = frob_norm(X_1[i] - X_2[j])
-            # print(f_norm)
-            K[i, j] = math.exp(inv_sigma * f_norm)
-
-    return K
+# If somebody does "from package import *", this is what they will
+# be able to access:
+__all__ = ['read_nc_data',
+           'read_db_data',
+           'read_qm7_data',
+           'c_matrix',
+           'c_matrix_multiple',
+           'lj_matrix',
+           'lj_matrix_multiple',
+           'frob_norm',
+           'gauss_kernel',
+           'cholesky_solve',
+           'do_ml',
+           'parallel_create_matrices',
+           'plot_benchmarks']

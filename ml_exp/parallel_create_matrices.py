@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from multiprocessing import Process, Pipe
-from lj_matrix.c_matrix import c_matrix_multiple
-from lj_matrix.lj_matrix import lj_matrix_multiple
+from ml_exp.c_matrix import c_matrix_multiple
+from ml_exp.lj_matrix import lj_matrix_multiple
 
 
 def parallel_create_matrices(mol_data,

@@ -20,29 +20,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from lj_matrix.read_qm7_data import read_nc_data, read_db_data, read_qm7_data
-from lj_matrix.c_matrix import c_matrix, c_matrix_multiple
-from lj_matrix.lj_matrix import lj_matrix, lj_matrix_multiple
-from lj_matrix.frob_norm import frob_norm
-from lj_matrix.gauss_kernel import gauss_kernel
-from lj_matrix.cholesky_solve import cholesky_solve
-from lj_matrix.do_ml import do_ml
-from lj_matrix.parallel_create_matrices import parallel_create_matrices
-from lj_matrix.misc import plot_benchmarks
+import math
+import numpy as np
+from ml_exp.frob_norm import frob_norm
 
 
-# If somebody does "from package import *", this is what they will
-# be able to access:
-__all__ = ['read_nc_data',
-           'read_db_data',
-           'read_qm7_data',
-           'c_matrix',
-           'c_matrix_multiple',
-           'lj_matrix',
-           'lj_matrix_multiple',
-           'frob_norm',
-           'gauss_kernel',
-           'cholesky_solve',
-           'do_ml',
-           'parallel_create_matrices',
-           'plot_benchmarks']
+def gauss_kernel(X_1, X_2, sigma):
+    """
+    Calculates the Gaussian Kernel.
+    X_1: first representations.
+    X_2: second representations.
+    sigma: kernel width.
+    """
+    x1_l = len(X_1)
+    x1_range = range(x1_l)
+    x2_l = len(X_2)
+    x2_range = range(x2_l)
+
+    inv_sigma = -0.5 / (sigma*sigma)
+
+    K = np.zeros((x1_l, x2_l))
+    for i in x1_range:
+        for j in x2_range:
+            f_norm = frob_norm(X_1[i] - X_2[j])
+            # print(f_norm)
+            K[i, j] = math.exp(inv_sigma * f_norm)
+
+    return K
