@@ -41,11 +41,12 @@ if __name__ == '__main__':
     # plot_benchmarks()
     xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
     for i in range(1):
-        fnm, bonds = fneig_matrix(atoms[i], xyz[i])
-        am = adj_matrix(bonds)
+        fnm, bonds, forces = fneig_matrix(atoms[i], xyz[i], nc[i], True)
+        am = adj_matrix(bonds, forces)
 
         print(f'{i} first neighbor matrix\n{fnm}')
         print(f'{i} bond list\n{bonds}')
+        print(f'{i} force list\n{forces}')
         print(f'{i} adjacency matrix\n{am}')
         print('-'*30)
     print('OK!')

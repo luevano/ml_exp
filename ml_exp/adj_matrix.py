@@ -20,24 +20,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from numpy import array, zeros
+from numpy import array, zeros, dot
 from numpy.linalg import norm
+from ml_exp.misc import printc
 
 
 def fneig_matrix(atoms,
-                 xyz):
+                 xyz,
+                 nc=None,
+                 use_forces=False):
     """
     Creates the first neighbor matrix of the given molecule data.
     atoms: list of atoms.
     xyz: matrix of atomic coords.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
+            C: 1.20 - 1.53 A
             H: 1.06 - 1.12 A
             O: 1.43 - 2.15 A
             N: 1.47 - 2.10 A
             S: 1.81 - 2.55 A
     """
+    if use_forces and nc is None:
+        printc(f'Error. use_forces={use_forces} but nc={nc}', 'RED')
+        return None
     # Possible bonds.
+    cc_bond = sorted(['C', 'C'])
     ch_bond = sorted(['C', 'H'])
     co_bond = sorted(['C', 'O'])
     cn_bond = sorted(['C', 'N'])
@@ -45,35 +53,54 @@ def fneig_matrix(atoms,
 
     # Number of atoms, empty matrix and bond list.
     n = len(atoms)
-    fnm = array(zeros((n, n)))
+    fnm = array(zeros((n, n)), dtype=float)
     bonds = []
+    forces = []
     for i, xyz_i in enumerate(xyz):
         for j, xyz_j in enumerate(xyz):
             # Ignore the diagonal.
             if i != j:
                 bond = sorted([atoms[i], atoms[j]])
-                r = norm(xyz_i - xyz_j)
+                rv = xyz_i - xyz_j
+                r = norm(rv)
                 # Check for each type of bond.
-                if (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
-                    fnm[i, j] = 1
+                if (cc_bond == bond) and (r >= 1.20 and r <= 1.53):
+                    fnm[i, j] = 1.0
                     if j > i:
                         bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+                elif (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
+                    fnm[i, j] = 0.5
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
                 elif (co_bond == bond) and (r >= 1.43 and r <= 2.15):
-                    fnm[i, j] = 1
+                    fnm[i, j] = 0.8
                     if j > i:
                         bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
                 elif (cn_bond == bond) and (r >= 1.47 and r <= 2.10):
-                    fnm[i, j] = 1
+                    fnm[i, j] = 1.0
                     if j > i:
                         bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
                 elif (cs_bond == bond) and (r >= 1.81 and r <= 2.55):
-                    fnm[i, j] = 1
+                    fnm[i, j] = 0.7
                     if j > i:
                         bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+    if use_forces:
+        return fnm, bonds, forces
     return fnm, bonds
 
 
-def adj_matrix(bonds):
+def adj_matrix(bonds,
+               forces=None):
     """
     Calculates the adjacency matrix given the bond list.
     bonds: list of bonds (tuple of indexes).
@@ -85,6 +112,8 @@ def adj_matrix(bonds):
             # Ignore the diagonal.
             if i != j:
                 if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
-                    am[i, j] = 1
-
+                    if forces:
+                        am[i, j] = dot(forces[i], forces[j])
+                    else:
+                        am[i, j] = 1
     return am
