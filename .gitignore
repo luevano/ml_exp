@@ -114,3 +114,7 @@ venv.bak/
 
 # Original data.
 .original_data/
+
+# Benchmarks and figures
+benchmarks.csv
+.figs/

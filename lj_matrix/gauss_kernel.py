@@ -20,41 +20,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import time
-from misc import printc
-# import matplotlib.pyplot as plt
-from read_qm7_data import read_qm7_data
-from c_matrix import c_matrix_multiple
-from lj_matrix import lj_matrix_multiple
-from do_ml import do_ml
+import math
+import numpy as np
+from lj_matrix.frob_norm import frob_norm
 
 
-# Initialization time.
-init_time = time.perf_counter()
+def gauss_kernel(X_1, X_2, sigma):
+    """
+    Calculates the Gaussian Kernel.
+    X_1: first representations.
+    X_2: second representations.
+    sigma: kernel width.
+    """
+    x1_l = len(X_1)
+    x1_range = range(x1_l)
+    x2_l = len(X_2)
+    x2_range = range(x2_l)
 
-# Data reading.
-zi_data, molecules, nuclear_charge, energy_pbe0, energy_delta =\
-    read_qm7_data()
+    inv_sigma = -0.5 / (sigma*sigma)
 
-# Matrices calculation.
-cm_data = c_matrix_multiple(molecules, nuclear_charge, as_eig=True)
-ljm_data = lj_matrix_multiple(molecules, nuclear_charge, as_eig=True)
+    K = np.zeros((x1_l, x2_l))
+    for i in x1_range:
+        for j in x2_range:
+            f_norm = frob_norm(X_1[i] - X_2[j])
+            # print(f_norm)
+            K[i, j] = math.exp(inv_sigma * f_norm)
 
-# ML calculation.
-do_ml(cm_data,
-      energy_pbe0,
-      1000,
-      test_size=100,
-      sigma=1000.0,
-      desc_type='CM')
-do_ml(ljm_data,
-      energy_pbe0,
-      1000,
-      test_size=100,
-      sigma=1000.0,
-      desc_type='L-JM')
-
-# End of program
-end_time = time.perf_counter()
-printc('Program took {:.4f} seconds of runtime.'.format(end_time - init_time),
-       'CYAN')
+    return K

@@ -20,34 +20,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from colorama import init, Fore, Style
+from lj_matrix.do_ml import do_ml
+# from lj_matrix.misc import plot_benchmarks
 
-init()
-
-
-def printc(text, color):
-    """
-    Prints texts normaly, but in color. Using colorama.
-    text: string with the text to print.
-    color: color to be used, same as available in colorama.
-    """
-    color_dic = {'BLACK': Fore.BLACK,
-                 'RED': Fore.RED,
-                 'GREEN': Fore.GREEN,
-                 'YELLOW': Fore.YELLOW,
-                 'BLUE': Fore.BLUE,
-                 'MAGENTA': Fore.MAGENTA,
-                 'CYAN': Fore.CYAN,
-                 'WHITE': Fore.WHITE,
-                 'RESET': Fore.RESET}
-
-    color_dic_keys = color_dic.keys()
-    if color not in color_dic_keys:
-        print(Fore.RED
-              + '\'{}\' not found, using default color.'.format(color)
-              + Style.RESET_ALL)
-        actual_color = Fore.RESET
-    else:
-        actual_color = color_dic[color]
-
-    print(actual_color + text + Style.RESET_ALL)
+if __name__ == '__main__':
+    do_ml(min_training_size=1500,
+          max_training_size=2000,
+          training_increment_size=500,
+          test_size=None,
+          ljm_diag_value=None,
+          ljm_sigma=1.0,
+          ljm_epsilon=1.0,
+          r_seed=111,
+          save_benchmarks=False,
+          show_msgs=True)
+    # plot_benchmarks()
+    print('OK!')
