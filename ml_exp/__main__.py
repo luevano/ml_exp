@@ -23,7 +23,9 @@ SOFTWARE.
 # from ml_exp.do_ml import do_ml
 # from ml_exp.misc import plot_benchmarks
 from ml_exp.read_qm7_data import read_qm7_data
-from ml_exp.adj_matrix import fneig_matrix, adj_matrix
+# from ml_exp.adj_matrix import fneig_matrix, adj_matrix
+from ml_exp.c_matrix import c_matrix
+from ml_exp.bob import bob
 
 if __name__ == '__main__':
     """
@@ -39,6 +41,7 @@ if __name__ == '__main__':
           show_msgs=True)
     """
     # plot_benchmarks()
+    """
     xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
     for i in range(1):
         fnm, bonds, forces = fneig_matrix(atoms[i], xyz[i], nc[i], True)
@@ -50,3 +53,10 @@ if __name__ == '__main__':
         print(f'{i} adjacency matrix\n{am}')
         print('-'*30)
     print('OK!')
+    """
+    xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
+    for i in range(1):
+        cm = c_matrix(xyz[i], nc[i], as_eig=False)
+        bob = bob(cm, atoms[i])
+        print(f'{i} coulomb matrix\n{cm}')
+        print(f'{i} bag of bonds\n{bob}')
