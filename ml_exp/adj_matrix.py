@@ -104,6 +104,7 @@ def adj_matrix(bonds,
     """
     Calculates the adjacency matrix given the bond list.
     bonds: list of bonds (tuple of indexes).
+    forces: list of forces.
     """
     n = len(bonds)
     am = array(zeros((n, n)))
