@@ -51,7 +51,7 @@ def bob(c_matrix,
     max_len: maximum amount of bonds in molecule.
     """
     n = len(atoms)
-    bond_n = (n*n-n)/2+n
+    bond_n = (n * n - n) / 2 + n
     n_r = range(n)
 
     if max_bond_len < bond_n:
