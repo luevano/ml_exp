@@ -33,6 +33,8 @@ def fneig_matrix(atoms,
     Creates the first neighbor matrix of the given molecule data.
     atoms: list of atoms.
     xyz: matrix of atomic coords.
+    nc: nuclear charge info.
+    use_forces: if the use of forces instead of k_cx should be used.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
             C: 1.20 - 1.53 A
@@ -71,7 +73,7 @@ def fneig_matrix(atoms,
                         if use_forces:
                             forces.append(rv*nc[i]*nc[j]/r**3)
                 elif (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
-                    fnm[i, j] = 0.5
+                    fnm[i, j] = 1.0
                     if j > i:
                         bonds.append((i, j))
                         if use_forces:
@@ -99,15 +101,24 @@ def fneig_matrix(atoms,
     return fnm, bonds
 
 
-def adj_matrix(bonds,
-               forces=None):
+def adj_matrix(fneig_matrix,
+               bonds,
+               forces=None,
+               max_len=25):
     """
     Calculates the adjacency matrix given the bond list.
     bonds: list of bonds (tuple of indexes).
+    max_len: maximum amount of atoms in molecule.
     forces: list of forces.
     """
     n = len(bonds)
-    am = array(zeros((n, n)))
+
+    if max_len < n:
+        print(''.join(['Error. Molecule matrix dimension (mol_n) is ',
+                       'greater than max_len. Using mol_n.']))
+        max_len = n
+
+    am = array(zeros((max_len, max_len)))
     for i, bond_i in enumerate(bonds):
         for j, bond_j in enumerate(bonds):
             # Ignore the diagonal.
@@ -116,5 +127,5 @@ def adj_matrix(bonds,
                     if forces:
                         am[i, j] = dot(forces[i], forces[j])
                     else:
-                        am[i, j] = 1
+                        am[i, j] = fneig_matrix[bond_i[0], bond_i[1]]
     return am

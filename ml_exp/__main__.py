@@ -23,9 +23,10 @@ SOFTWARE.
 # from ml_exp.do_ml import do_ml
 # from ml_exp.misc import plot_benchmarks
 from ml_exp.read_qm7_data import read_qm7_data
-# from ml_exp.adj_matrix import fneig_matrix, adj_matrix
+from ml_exp.adj_matrix import fneig_matrix, adj_matrix
 from ml_exp.c_matrix import c_matrix
 from ml_exp.bob import bob
+from ml_exp.bostuff import bok_cx
 
 if __name__ == '__main__':
     """
@@ -58,5 +59,13 @@ if __name__ == '__main__':
     for i in range(1):
         cm = c_matrix(xyz[i], nc[i], as_eig=False)
         bob = bob(cm, atoms[i])
+
         print(f'{i} coulomb matrix\n{cm}')
         print(f'{i} bag of bonds\n{bob}')
+
+        fnm, bonds = fneig_matrix(atoms[i], xyz[i], nc[i], False)
+        am = adj_matrix(fnm, bonds, None)
+        bok_cx = bok_cx(am, atoms[i])
+
+        print(f'{i} adjacency matrix\n{am}')
+        print(f'{i} bag of k_cx\n{bok_cx}')
