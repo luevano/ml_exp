@@ -43,6 +43,7 @@ def check_bond(bags,
 
 def bob(c_matrix,
         atoms,
+        max_n=25,
         max_bond_len=325):
     """
     Creates the bag of bond using the coulomb matrix data.
@@ -54,10 +55,15 @@ def bob(c_matrix,
     bond_n = (n * n - n) / 2 + n
     n_r = range(n)
 
+    if max_n < n:
+        print(''.join(['Error. Molecule matrix dimension (mol_n) is ',
+                       'greater than max_len. Using mol_n.']))
+        max_n = n
+
     if max_bond_len < bond_n:
         print(''.join(['Error. Molecule bond lenght (bond_n) is ',
                        'greater than max_bond_len. Using bond_n.']))
-        max_bond_len = None
+        max_bond_len = bond_n
 
     # List where each bag data is stored.
     bags = []
@@ -90,11 +96,13 @@ def bob(c_matrix,
     # Create the final vector for the bob.
     bob = array(zeros(max_bond_len), dtype=float)
     c_i = 0
-    for bond in bonds:
+    for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)
         if checker[0]:
-            for num in bags[checker[1]][1:]:
-                bob[c_i] = num
+            for j, num in enumerate(bags[checker[1]][1:]):
+                # Use c_i as the index for bob if the zero padding should
+                # be at the end of the vector instead of between each bond.
+                bob[i*max_n + j] = num
                 c_i += 1
         # This is set to false because this was a debugging measure.
         elif False:
