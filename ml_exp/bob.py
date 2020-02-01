@@ -49,7 +49,8 @@ def bob(c_matrix,
     Creates the bag of bond using the coulomb matrix data.
     c_matrix: coulomb matrix.
     atoms: list of atoms.
-    max_len: maximum amount of bonds in molecule.
+    max_n: maximum amount of atoms.
+    max_bond_len: maximum amount of bonds in molecule.
     """
     n = len(atoms)
     bond_n = (n * n - n) / 2 + n
