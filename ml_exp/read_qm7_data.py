@@ -35,7 +35,7 @@ def read_nc_data(data_path):
     data_path: path to the data directory.
     """
     fname = 'periodic_table_of_elements.txt'
-    with open(''.join([data_path, '\\', fname]), 'r') as infile:
+    with open(''.join([data_path, '/', fname]), 'r') as infile:
         temp_lines = infile.readlines()
 
     del temp_lines[0]

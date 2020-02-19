@@ -150,7 +150,7 @@ def do_ml(min_training_size,
 
     # Data reading.
     molecules, nuclear_charge, energy_pbe0, energy_delta =\
-        read_qm7_data(r_seed)
+        read_qm7_data(r_seed=r_seed)
 
     # Matrices calculation.
     cm_data, ljm_data = parallel_create_matrices(molecules,
