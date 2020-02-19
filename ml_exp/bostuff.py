@@ -45,7 +45,7 @@ def bok_cx(adj_matrix,
         max_n = n
 
     if max_bond_len < bond_n:
-        print(''.join(['Error. Molecule bond lenght (bond_n) is ',
+        print(''.join(['Error. Molecule bond length (bond_n) is ',
                        'greater than max_bond_len. Using bond_n.']))
         max_bond_len = bond_n
 

@@ -58,14 +58,14 @@ if __name__ == '__main__':
     xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
     for i in range(1):
         cm = c_matrix(xyz[i], nc[i], as_eig=False)
-        bob = bob(cm, atoms[i])
+        bob_i = bob(cm, atoms[i])
 
         print(f'{i} coulomb matrix\n{cm}')
         print(f'{i} bag of bonds\n{bob}')
 
         fnm, bonds = fneig_matrix(atoms[i], xyz[i], nc[i], False)
         am = adj_matrix(fnm, bonds, None)
-        bok_cx = bok_cx(am, atoms[i])
+        bok_cx_i = bok_cx(am, atoms[i])
 
         print(f'{i} adjacency matrix\n{am}')
-        print(f'{i} bag of k_cx\n{bok_cx}')
+        print(f'{i} bag of k_cx\n{bok_cx_i}')
