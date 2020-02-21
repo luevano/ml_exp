@@ -22,50 +22,11 @@ SOFTWARE.
 """
 # from ml_exp.do_ml import do_ml
 # from ml_exp.misc import plot_benchmarks
-from ml_exp.read_qm7_data import read_qm7_data
-from ml_exp.adj_matrix import fneig_matrix, adj_matrix
-from ml_exp.c_matrix import c_matrix
-from ml_exp.bob import bob
-from ml_exp.bostuff import bok_cx
+# from ml_exp.read_qm7_data import read_qm7_data
+# from ml_exp.adj_matrix import fneig_matrix, adj_matrix
+# from ml_exp.c_matrix import c_matrix
+# from ml_exp.bob import bob
+# from ml_exp.bostuff import bok_cx
 
 if __name__ == '__main__':
-    """
-    do_ml(min_training_size=1500,
-          max_training_size=2000,
-          training_increment_size=500,
-          test_size=None,
-          ljm_diag_value=None,
-          ljm_sigma=1.0,
-          ljm_epsilon=1.0,
-          r_seed=111,
-          save_benchmarks=False,
-          show_msgs=True)
-    """
-    # plot_benchmarks()
-    """
-    xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
-    for i in range(1):
-        fnm, bonds, forces = fneig_matrix(atoms[i], xyz[i], nc[i], True)
-        am = adj_matrix(bonds, forces)
-
-        print(f'{i} first neighbor matrix\n{fnm}')
-        print(f'{i} bond list\n{bonds}')
-        print(f'{i} force list\n{forces}')
-        print(f'{i} adjacency matrix\n{am}')
-        print('-'*30)
-    print('OK!')
-    """
-    xyz, nc, pbe0, delta, atoms = read_qm7_data(return_atoms=True)
-    for i in range(1):
-        cm = c_matrix(xyz[i], nc[i], as_eig=False)
-        bob_i = bob(cm, atoms[i])
-
-        print(f'{i} coulomb matrix\n{cm}')
-        print(f'{i} bag of bonds\n{bob}')
-
-        fnm, bonds = fneig_matrix(atoms[i], xyz[i], nc[i], False)
-        am = adj_matrix(fnm, bonds, None)
-        bok_cx_i = bok_cx(am, atoms[i])
-
-        print(f'{i} adjacency matrix\n{am}')
-        print(f'{i} bag of k_cx\n{bok_cx_i}')
+    print('Ok!')
