@@ -20,5 +20,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-if __name__ == '__main__':
-    print('Ok!')
+import numpy as np
+
+
+class Compound:
+    def __init__(self, xyz=None):
+        self.n = None
+        self.atoms = None
+        self.coordinates = None
+
+        if xyz is not None:
+            self.read_xyz(xyz)
+
+    def read_xyz(self, filename):
+        """
+        Reads an xyz file and adds the corresponding data to the Compound.
+        filename: (path to) the xyz file.
+        """
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+
+        self.n = int(lines[0])
+        self.atoms = []
+        self.coordinates = np.empty((self.n, 3), dtype=float)
+
+        for i, atom in enumerate(lines[2:self.n + 2]):
+            atom_d = atom.split()
+
+            self.atoms.append(atom_d[0])
+            self.coordinates[i] = np.asarray(atom_d[1:4], dtype=float)
