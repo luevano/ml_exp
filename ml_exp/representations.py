@@ -204,3 +204,111 @@ def lennard_jones_matrix(coords,
         return lj_sorted
     else:
         return lj
+
+
+def fneig_matrix(atoms,
+                 xyz,
+                 nc=None,
+                 use_forces=False):
+    """
+    Creates the first neighbor matrix of the given molecule data.
+    atoms: list of atoms.
+    xyz: matrix of atomic coords.
+    nc: nuclear charge info.
+    use_forces: if the use of forces instead of k_cx should be used.
+    NOTE: Bond distance of carbon to other elements
+        are (for atoms present in the qm7 dataset):
+            C: 1.20 - 1.53 A
+            H: 1.06 - 1.12 A
+            O: 1.43 - 2.15 A
+            N: 1.47 - 2.10 A
+            S: 1.81 - 2.55 A
+    """
+    if use_forces and nc is None:
+        # print(f'Error. use_forces={use_forces} but nc={nc}', 'RED')
+        return None
+    # Possible bonds.
+    cc_bond = sorted(['C', 'C'])
+    ch_bond = sorted(['C', 'H'])
+    co_bond = sorted(['C', 'O'])
+    cn_bond = sorted(['C', 'N'])
+    cs_bond = sorted(['C', 'S'])
+
+    # Number of atoms, empty matrix and bond list.
+    n = len(atoms)
+    fnm = np.empty((n, n), dtype=float)
+    bonds = []
+    forces = []
+    for i, xyz_i in enumerate(xyz):
+        for j, xyz_j in enumerate(xyz):
+
+            # Ignore the diagonal.
+            if i != j:
+                bond = sorted([atoms[i], atoms[j]])
+                rv = xyz_i - xyz_j
+                r = np.linalg.norm(rv)
+
+                # Check for each type of bond.
+                if (cc_bond == bond) and (r >= 1.20 and r <= 1.53):
+                    fnm[i, j] = 1.0
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+                elif (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
+                    fnm[i, j] = 1.0
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+                elif (co_bond == bond) and (r >= 1.43 and r <= 2.15):
+                    fnm[i, j] = 0.8
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+                elif (cn_bond == bond) and (r >= 1.47 and r <= 2.10):
+                    fnm[i, j] = 1.0
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+                elif (cs_bond == bond) and (r >= 1.81 and r <= 2.55):
+                    fnm[i, j] = 0.7
+                    if j > i:
+                        bonds.append((i, j))
+                        if use_forces:
+                            forces.append(rv*nc[i]*nc[j]/r**3)
+    if use_forces:
+        return fnm, bonds, forces
+    return fnm, bonds
+
+
+def adj_matrix(fneig_matrix,
+               bonds,
+               forces=None,
+               max_len=25):
+    """
+    Calculates the adjacency matrix given the bond list.
+    bonds: list of bonds (tuple of indexes).
+    max_len: maximum amount of atoms in molecule.
+    forces: list of forces.
+    """
+    n = len(bonds)
+
+    if max_len < n:
+        print(''.join(['Error. Molecule matrix dimension (mol_n) is ',
+                       'greater than max_len. Using mol_n.']))
+        max_len = n
+
+    am = np.empty((max_len, max_len), dtype=float)
+    for i, bond_i in enumerate(bonds):
+        for j, bond_j in enumerate(bonds):
+            # Ignore the diagonal.
+            if i != j:
+                if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
+                    if forces:
+                        am[i, j] = np.dot(forces[i], forces[j])
+                    else:
+                        am[i, j] = fneig_matrix[bond_i[0], bond_i[1]]
+    return am
