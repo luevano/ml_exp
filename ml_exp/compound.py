@@ -41,6 +41,9 @@ class Compound:
         if xyz is not None:
             self.read_xyz(xyz)
 
+    def gen_cm(self):
+        pass
+
     def read_xyz(self, filename):
         """
         Reads an xyz file and adds the corresponding data to the Compound.

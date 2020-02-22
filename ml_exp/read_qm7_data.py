@@ -21,10 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import os
-import time
 import numpy as np
 import random
-from ml_exp.misc import printc
 
 
 # 'periodic_table_of_elements.txt' retrieved from
@@ -136,38 +134,6 @@ def read_db_data(zi_data,
     energy_delta = np.array([energy_temp_shuffled[k][1]
                              for k in energy_temp_shuffled.keys()])
 
-    if return_atoms:
-        return molecules, nuclear_charge, energy_pbe0, energy_delta, atoms
-    return molecules, nuclear_charge, energy_pbe0, energy_delta
-
-
-def read_qm7_data(data_path='data',
-                  r_seed=111,
-                  return_atoms=False):
-    """
-    Reads all the qm7 data.
-    data_path: path to the data directory.
-    r_seed: random seed to use for the shuffling.
-    return_atoms: if atom list should be returned.
-    """
-    tic = time.perf_counter()
-    printc('Data reading started.', 'CYAN')
-
-    init_path = os.getcwd()
-    os.chdir(data_path)
-    data_path = os.getcwd()
-
-    zi_data = read_nc_data(data_path)
-    if return_atoms:
-        molecules, nuclear_charge, energy_pbe0, energy_delta, atoms = \
-            read_db_data(zi_data, data_path, r_seed, return_atoms)
-    else:
-        molecules, nuclear_charge, energy_pbe0, energy_delta = \
-            read_db_data(zi_data, data_path, r_seed)
-
-    os.chdir(init_path)
-    toc = time.perf_counter()
-    printc('\tData reading took {:.4f} seconds.'.format(toc-tic), 'GREEN')
     if return_atoms:
         return molecules, nuclear_charge, energy_pbe0, energy_delta, atoms
     return molecules, nuclear_charge, energy_pbe0, energy_delta
