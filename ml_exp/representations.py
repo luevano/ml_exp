@@ -38,87 +38,36 @@ def coulomb_matrix(coords,
     bohr_radius_units: if units should be in bohr's radius units.
     """
     if bohr_radius_units:
-        conversion_rate = 0.52917721067
+        cr = 0.52917721067
     else:
-        conversion_rate = 1
+        cr = 1
 
     n = coords.shape[0]
-    nr = range(n)
 
     if not n == nc.shape[0]:
         raise ValueError('Compound size is different than the nuclear charge\
                          size. Arrays are not of the right shape.')
 
     if size < n:
-        print(''.join(['Error. Molecule matrix dimension (n) is ',
-                       'greater than size. Using n.']))
-        size = None
+        print('Error. Compound size (n) is greater han (size). Using (n)\
+              instead of (size).')
+        size = n
 
-    if size:
-        cm = np.zeros((size, size))
-        ml_r = range(size)
+    nr = range(size)
+    cm = np.empty((size, size), dtype=float)
 
-        # Actual calculation of the coulomb matrix.
-        for i in ml_r:
-            if i < n:
-                x_i = coords[i, 0]
-                y_i = coords[i, 1]
-                z_i = coords[i, 2]
-                Z_i = nc[i]
-            else:
-                break
-
-            for j in ml_r:
-                if j < n:
-                    x_j = coords[j, 0]
-                    y_j = coords[j, 1]
-                    z_j = coords[j, 2]
-                    Z_j = nc[j]
-
-                    x = (x_i-x_j)**2
-                    y = (y_i-y_j)**2
-                    z = (z_i-z_j)**2
-
-                    if i == j:
-                        cm[i, j] = (0.5*Z_i**2.4)
-                    else:
-                        cm[i, j] = (conversion_rate*Z_i*Z_j/math.sqrt(x
-                                                                      + y
-                                                                      + z))
-                else:
-                    break
-
-        # Now the value will be returned.
-        if as_eig:
-            cm_sorted = np.sort(np.linalg.eig(cm)[0])[::-1]
-            # Thanks to SO for the following lines of code.
-            # https://stackoverflow.com/a/43011036
-
-            # Keep zeros at the end.
-            mask = cm_sorted != 0.
-            f_mask = mask.sum(0, keepdims=1) >\
-                np.arange(cm_sorted.shape[0]-1, -1, -1)
-
-            f_mask = f_mask[::-1]
-            cm_sorted[f_mask] = cm_sorted[mask]
-            cm_sorted[~f_mask] = 0.
-
-            return cm_sorted
-
-        else:
-            return cm
-
-    else:
-        cm_temp = []
-        # Actual calculation of the coulomb matrix.
-        for i in nr:
+    # Actual calculation of the coulomb matrix.
+    for i in nr:
+        if i < n:
             x_i = coords[i, 0]
             y_i = coords[i, 1]
             z_i = coords[i, 2]
             Z_i = nc[i]
+        else:
+            break
 
-            cm_row = []
-            for j in nr:
+        for j in nr:
+            if j < n:
                 x_j = coords[j, 0]
                 y_j = coords[j, 1]
                 z_j = coords[j, 2]
@@ -129,17 +78,27 @@ def coulomb_matrix(coords,
                 z = (z_i-z_j)**2
 
                 if i == j:
-                    cm_row.append(0.5*Z_i**2.4)
+                    cm[i, j] = (0.5*Z_i**2.4)
                 else:
-                    cm_row.append(conversion_rate*Z_i*Z_j/math.sqrt(x
-                                                                    + y
-                                                                    + z))
+                    cm[i, j] = (cr*Z_i*Z_j/math.sqrt(x + y + z))
+            else:
+                break
 
-            cm_temp.append(np.array(cm_row))
+    # Now the value will be returned.
+    if as_eig:
+        cm_sorted = np.sort(np.linalg.eig(cm)[0])[::-1]
+        # Thanks to SO for the following lines of code.
+        # https://stackoverflow.com/a/43011036
 
-        cm = np.array(cm_temp)
-        # Now the value will be returned.
-        if as_eig:
-            return np.sort(np.linalg.eig(cm)[0])[::-1]
-        else:
-            return cm
+        # Keep zeros at the end.
+        mask = cm_sorted != 0.
+        f_mask = mask.sum(0, keepdims=1) >\
+            np.arange(cm_sorted.shape[0]-1, -1, -1)
+
+        f_mask = f_mask[::-1]
+        cm_sorted[f_mask] = cm_sorted[mask]
+        cm_sorted[~f_mask] = 0.
+
+        return cm_sorted
+    else:
+        return cm
