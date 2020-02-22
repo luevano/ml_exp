@@ -20,11 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import time
 import math
 import numpy as np
 from numpy.linalg import eig
-from ml_exp.misc import printc
 
 
 def lj_matrix(mol_data,
@@ -176,47 +174,3 @@ def lj_matrix(mol_data,
                 return np.sort(eig(lj)[0])[::-1]
             else:
                 return lj
-
-
-def lj_matrix_multiple(mol_data,
-                       nc_data,
-                       pipe=None,
-                       diag_value=None,
-                       sigma=1.0,
-                       epsilon=1.0,
-                       max_len=25,
-                       as_eig=True,
-                       bohr_radius_units=False):
-    """
-    Calculates the Lennard-Jones Matrix of multiple molecules.
-    mol_data: molecule data, matrix of atom coordinates.
-    nc_data: nuclear charge data, array of atom data.
-    pipe: for multiprocessing purposes. Sends the data calculated
-        through a pipe.
-    diag_value: if special diagonal value is to be used.
-    sigma: sigma value.
-    epsilon: epsilon value.
-    max_len: maximum amount of atoms in molecule.
-    as_eig: if data should be returned as matrix or array of eigenvalues.
-    bohr_radius_units: if units should be in bohr's radius units.
-    """
-    printc('L-J Matrices calculation started.', 'CYAN')
-    tic = time.perf_counter()
-
-    ljm_data = np.array([lj_matrix(mol,
-                                   nc,
-                                   diag_value,
-                                   sigma,
-                                   epsilon,
-                                   max_len,
-                                   as_eig,
-                                   bohr_radius_units)
-                        for mol, nc in zip(mol_data, nc_data)])
-
-    toc = time.perf_counter()
-    printc('\tL-JM calculation took {:.4f} seconds.'.format(toc-tic), 'GREEN')
-
-    if pipe:
-        pipe.send(ljm_data)
-
-    return ljm_data
