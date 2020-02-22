@@ -20,7 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import math
 import numpy as np
 
 
@@ -53,36 +52,17 @@ def coulomb_matrix(coords,
               instead of (size).')
         size = n
 
-    nr = range(size)
     cm = np.zeros((size, size), dtype=float)
 
     # Actual calculation of the coulomb matrix.
-    for i in nr:
-        if i < n:
-            x_i = coords[i, 0]
-            y_i = coords[i, 1]
-            z_i = coords[i, 2]
-            Z_i = nc[i]
-        else:
-            break
-
-        for j in nr:
-            if j < n:
-                x_j = coords[j, 0]
-                y_j = coords[j, 1]
-                z_j = coords[j, 2]
-                Z_j = nc[j]
-
-                x = (x_i-x_j)**2
-                y = (y_i-y_j)**2
-                z = (z_i-z_j)**2
-
-                if i == j:
-                    cm[i, j] = (0.5*Z_i**2.4)
-                else:
-                    cm[i, j] = (cr*Z_i*Z_j/math.sqrt(x + y + z))
+    for i, xyz_i in enumerate(coords):
+        for j, xyz_j in enumerate(coords):
+            rv = xyz_i - xyz_j
+            r = np.linalg.norm(rv)/cr
+            if i == j:
+                cm[i, j] = (0.5*nc[i]**2.4)
             else:
-                break
+                cm[i, j] = nc[i]*nc[j]/r
 
     # Now the value will be returned.
     if as_eig:
@@ -139,52 +119,31 @@ def lennard_jones_matrix(coords,
               instead of (size).')
         size = n
 
-    nr = range(size)
     lj = np.zeros((size, size), dtype=float)
 
     # Actual calculation of the lennard-jones matrix.
-    for i in nr:
-        if i < n:
-            x_i = coords[i, 0]
-            y_i = coords[i, 1]
-            z_i = coords[i, 2]
-            Z_i = nc[i]
-        else:
-            break
-
-        for j in nr:
-            if j < n:
-                x_j = coords[j, 0]
-                y_j = coords[j, 1]
-                z_j = coords[j, 2]
-                # Never really used because when needed it is equal to Z_i.
-                # Z_j = nc[j]
-
-                x = (x_i-x_j)**2
-                y = (y_i-y_j)**2
-                z = (z_i-z_j)**2
-
-                if i == j:
-                    if diag_value is None:
-                        lj[i, j] = (0.5*Z_i**2.4)
-                    else:
-                        lj[i, j] = diag_value
+    for i, xyz_i in enumerate(coords):
+        for j, xyz_j in enumerate(coords):
+            if i == j:
+                if diag_value is None:
+                    lj[i, j] = (0.5*nc[i]**2.4)
                 else:
-                    # Calculations are done after i==j is checked
-                    # so no division by zero is done.
-
-                    # A little play with r exponents
-                    # so no square root is calculated.
-                    # Conversion factor is included in r^2.
-
-                    # 1/r^2
-                    r_2 = sigma**2/(cr**2*(x + y + z))
-
-                    r_6 = math.pow(r_2, 3)
-                    r_12 = math.pow(r_6, 2)
-                    lj[i, j] = (4*epsilon*(r_12 - r_6))
+                    lj[i, j] = diag_value
             else:
-                break
+                # Calculations are done after i==j is checked
+                # so no division by zero is done.
+
+                # A little play with r exponents
+                # so no square root is calculated.
+                # Conversion factor is included in r^2.
+                rv = xyz_i - xyz_j
+                r = sigma*np.linalg.norm(rv)/cr
+
+                # 1/r^n
+                r_2 = 1/r**2
+                r_6 = r_2**3
+                r_12 = r_6**2
+                lj[i, j] = (4*epsilon*(r_12 - r_6))
 
     # Now the value will be returned.
     if as_eig:
