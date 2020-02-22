@@ -22,10 +22,16 @@ SOFTWARE.
 """
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
+from ml_exp.representations import coulomb_matrix
 
 
 class Compound:
-    def __init__(self, xyz=None):
+    def __init__(self,
+                 xyz=None):
+        """
+        Initialization of the Compound.
+        xyz: (path to) the xyz file.
+        """
         # empty_array = np.asarray([], dtype=float)
 
         self.n = None
@@ -41,10 +47,24 @@ class Compound:
         if xyz is not None:
             self.read_xyz(xyz)
 
-    def gen_cm(self):
-        pass
+    def gen_cm(self,
+               size=23,
+               as_eig=True,
+               bohr_ru=False):
+        """
+        Generate the Coulomb Matrix for the compund.
+        size: compound size.
+        as_eig: if the representation should be as the eigenvalues.
+        bhor_ru: if radius units should be in bohr's radius units.
+        """
+        self.coulomb_matrix = coulomb_matrix(self.coordinates,
+                                             self.atoms_nc,
+                                             size=size,
+                                             as_eig=as_eig,
+                                             bhor_ru=bohr_ru)
 
-    def read_xyz(self, filename):
+    def read_xyz(self,
+                 filename):
         """
         Reads an xyz file and adds the corresponding data to the Compound.
         filename: (path to) the xyz file.

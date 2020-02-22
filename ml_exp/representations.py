@@ -28,16 +28,16 @@ def coulomb_matrix(coords,
                    nc,
                    size=23,
                    as_eig=True,
-                   bohr_radius_units=False):
+                   bhor_ru=False):
     """
     Creates the Coulomb Matrix from the molecule data given.
     coords: compound coordinates.
     nc: nuclear charge data.
     size: compound size.
-    as_eig: if data should be returned as matrix or array of eigenvalues.
-    bohr_radius_units: if units should be in bohr's radius units.
+    as_eig: if the representation should be as the eigenvalues.
+    bhor_ru: if radius units should be in bohr's radius units.
     """
-    if bohr_radius_units:
+    if bhor_ru:
         cr = 0.52917721067
     else:
         cr = 1
@@ -54,7 +54,7 @@ def coulomb_matrix(coords,
         size = n
 
     nr = range(size)
-    cm = np.empty((size, size), dtype=float)
+    cm = np.zeros((size, size), dtype=float)
 
     # Actual calculation of the coulomb matrix.
     for i in nr:

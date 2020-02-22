@@ -20,29 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from ml_exp.read_qm7_data import read_nc_data, read_db_data, read_qm7_data
-from ml_exp.c_matrix import c_matrix, c_matrix_multiple
-from ml_exp.lj_matrix import lj_matrix, lj_matrix_multiple
-from ml_exp.frob_norm import frob_norm
-from ml_exp.gauss_kernel import gauss_kernel
-from ml_exp.cholesky_solve import cholesky_solve
-from ml_exp.do_ml import do_ml
-from ml_exp.parallel_create_matrices import parallel_create_matrices
-from ml_exp.misc import plot_benchmarks
-
+from ml_exp.compound import Compound
+from ml_exp.representations import coulomb_matrix
 
 # If somebody does "from package import *", this is what they will
 # be able to access:
-__all__ = ['read_nc_data',
-           'read_db_data',
-           'read_qm7_data',
-           'c_matrix',
-           'c_matrix_multiple',
-           'lj_matrix',
-           'lj_matrix_multiple',
-           'frob_norm',
-           'gauss_kernel',
-           'cholesky_solve',
-           'do_ml',
-           'parallel_create_matrices',
-           'plot_benchmarks']
+__all__ = ['Compound',
+           'coulomb_matrix']
