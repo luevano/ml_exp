@@ -28,16 +28,16 @@ def coulomb_matrix(coords,
                    nc,
                    size=23,
                    as_eig=True,
-                   bhor_ru=False):
+                   bohr_ru=False):
     """
     Creates the Coulomb Matrix from the molecule data given.
     coords: compound coordinates.
     nc: nuclear charge data.
     size: compound size.
     as_eig: if the representation should be as the eigenvalues.
-    bhor_ru: if radius units should be in bohr's radius units.
+    bohr_ru: if radius units should be in bohr's radius units.
     """
-    if bhor_ru:
+    if bohr_ru:
         cr = 0.52917721067
     else:
         cr = 1
@@ -111,7 +111,7 @@ def lennard_jones_matrix(coords,
                          epsilon=1.0,
                          size=23,
                          as_eig=True,
-                         bhor_ru=False):
+                         bohr_ru=False):
     """
     Creates the Lennard-Jones Matrix from the molecule data given.
     coords: compound coordinates.
@@ -121,9 +121,9 @@ def lennard_jones_matrix(coords,
     epsilon: epsilon value.
     size: compound size.
     as_eig: if the representation should be as the eigenvalues.
-    bhor_ru: if radius units should be in bohr's radius units.
+    bohr_ru: if radius units should be in bohr's radius units.
     """
-    if bhor_ru:
+    if bohr_ru:
         cr = 0.52917721067
     else:
         cr = 1
@@ -206,16 +206,18 @@ def lennard_jones_matrix(coords,
         return lj
 
 
-def fneig_matrix(atoms,
-                 xyz,
-                 nc=None,
-                 use_forces=False):
+def first_neighbor_matrix(coords,
+                          nc,
+                          atoms,
+                          use_forces=False,
+                          bohr_ru=False):
     """
-    Creates the first neighbor matrix of the given molecule data.
+    Creates the First Neighbor Matrix from the molecule data given.
+    coords: compound coordinates.
+    nc: nuclear charge data.
     atoms: list of atoms.
-    xyz: matrix of atomic coords.
-    nc: nuclear charge info.
     use_forces: if the use of forces instead of k_cx should be used.
+    bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
             C: 1.20 - 1.53 A
@@ -224,9 +226,17 @@ def fneig_matrix(atoms,
             N: 1.47 - 2.10 A
             S: 1.81 - 2.55 A
     """
-    if use_forces and nc is None:
-        # print(f'Error. use_forces={use_forces} but nc={nc}', 'RED')
-        return None
+    if bohr_ru:
+        cr = 0.52917721067
+    else:
+        cr = 1
+
+    n = coords.shape[0]
+
+    if not n == nc.shape[0]:
+        raise ValueError('Compound size is different than the nuclear charge\
+                         size. Arrays are not of the right shape.')
+
     # Possible bonds.
     cc_bond = sorted(['C', 'C'])
     ch_bond = sorted(['C', 'H'])
@@ -234,19 +244,21 @@ def fneig_matrix(atoms,
     cn_bond = sorted(['C', 'N'])
     cs_bond = sorted(['C', 'S'])
 
-    # Number of atoms, empty matrix and bond list.
-    n = len(atoms)
-    fnm = np.empty((n, n), dtype=float)
+    if use_forces:
+        fnm = np.empty((n, n), dtype=float)
+    else:
+        fnm = np.empty((n, n), dtype=int)
+
     bonds = []
     forces = []
-    for i, xyz_i in enumerate(xyz):
-        for j, xyz_j in enumerate(xyz):
+    for i, xyz_i in enumerate(coords):
+        for j, xyz_j in enumerate(coords):
 
             # Ignore the diagonal.
             if i != j:
                 bond = sorted([atoms[i], atoms[j]])
                 rv = xyz_i - xyz_j
-                r = np.linalg.norm(rv)
+                r = np.linalg.norm(rv)/cr
 
                 # Check for each type of bond.
                 if (cc_bond == bond) and (r >= 1.20 and r <= 1.53):
@@ -279,29 +291,33 @@ def fneig_matrix(atoms,
                         bonds.append((i, j))
                         if use_forces:
                             forces.append(rv*nc[i]*nc[j]/r**3)
-    if use_forces:
-        return fnm, bonds, forces
-    return fnm, bonds
+
+    return fnm, bonds, forces
 
 
-def adj_matrix(fneig_matrix,
-               bonds,
-               forces=None,
-               max_len=25):
+def adjacency_matrix(fnm,
+                     bonds,
+                     forces,
+                     size=23):
     """
     Calculates the adjacency matrix given the bond list.
+    fnm: first neighbour matrix.
     bonds: list of bonds (tuple of indexes).
-    max_len: maximum amount of atoms in molecule.
     forces: list of forces.
+    size: compund size.
     """
     n = len(bonds)
 
-    if max_len < n:
-        print(''.join(['Error. Molecule matrix dimension (mol_n) is ',
-                       'greater than max_len. Using mol_n.']))
-        max_len = n
+    if size < n:
+        print('Error. Compound size (n) is greater han (size). Using (n)\
+              instead of (size).')
+        size = n
 
-    am = np.empty((max_len, max_len), dtype=float)
+    if forces:
+        am = np.empty((size, size), dtype=float)
+    else:
+        am = np.empty((size, size), dtype=int)
+
     for i, bond_i in enumerate(bonds):
         for j, bond_j in enumerate(bonds):
             # Ignore the diagonal.
@@ -310,5 +326,6 @@ def adj_matrix(fneig_matrix,
                     if forces:
                         am[i, j] = np.dot(forces[i], forces[j])
                     else:
-                        am[i, j] = fneig_matrix[bond_i[0], bond_i[1]]
+                        am[i, j] = fnm[bond_i[0], bond_i[1]]
+
     return am

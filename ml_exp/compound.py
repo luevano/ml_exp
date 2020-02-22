@@ -22,7 +22,8 @@ SOFTWARE.
 """
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
-from ml_exp.representations import coulomb_matrix, lennard_jones_matrix
+from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
+    first_neighbor_matrix, adjacency_matrix
 
 
 class Compound:
@@ -42,6 +43,7 @@ class Compound:
 
         self.cm = None
         self.ljm = None
+        self.am = None
         self.bob = None
 
         if xyz is not None:
@@ -55,13 +57,13 @@ class Compound:
         Generate the Coulomb Matrix for the compund.
         size: compound size.
         as_eig: if the representation should be as the eigenvalues.
-        bhor_ru: if radius units should be in bohr's radius units.
+        bohr_ru: if radius units should be in bohr's radius units.
         """
         self.cm = coulomb_matrix(self.coordinates,
                                  self.atoms_nc,
                                  size=size,
                                  as_eig=as_eig,
-                                 bhor_ru=bohr_ru)
+                                 bohr_ru=bohr_ru)
 
     def gen_ljm(self,
                 diag_value=None,
@@ -77,7 +79,7 @@ class Compound:
         epsilon: epsilon value.
         size: compound size.
         as_eig: if the representation should be as the eigenvalues.
-        bhor_ru: if radius units should be in bohr's radius units.
+        bohr_ru: if radius units should be in bohr's radius units.
         """
         self.ljm = lennard_jones_matrix(self.coordinates,
                                         self.atoms_nc,
@@ -86,7 +88,30 @@ class Compound:
                                         epsilon=epsilon,
                                         size=size,
                                         as_eig=as_eig,
-                                        bhor_ru=bohr_ru)
+                                        bohr_ru=bohr_ru)
+
+    def gen_am(self,
+               use_forces=False,
+               size=23,
+               bohr_ru=False):
+        """
+        Generate the Adjacency Matrix for the compund.
+        use_forces: if the use of forces instead of k_cx should be used.
+        size: compound size.
+        bohr_ru: if radius units should be in bohr's radius units.
+        """
+        # First, generate the first neighor matrix.
+        fnm, bonds, forces = first_neighbor_matrix(self.coordinates,
+                                                   self.atoms_nc,
+                                                   self.atoms,
+                                                   use_forces=use_forces,
+                                                   bohr_ru=bohr_ru)
+
+        # Now, generate the adjacency matrix.
+        self.am = adjacency_matrix(fnm,
+                                   bonds,
+                                   forces,
+                                   size=size)
 
     def read_xyz(self,
                  filename):
