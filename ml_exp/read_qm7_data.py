@@ -49,6 +49,17 @@ def read_nc_data(data_path):
     return {line[2]: int(line[0]) for line in lines}
 
 
+# For use in the rewriting of the code (from functional programming to object
+# oriented programming-ish)
+def print_nc(nc_data):
+    """
+    Prints the nuclear charge data to the terminal.
+    nc_data: dict of nc.
+    """
+    for key in nc_data.keys():
+        print(f'\'{key}\': {nc_data[key]},')
+
+
 # 'hof_qm7.txt.txt' retrieved from
 # https://github.com/qmlcode/tutorial
 def read_db_data(zi_data,

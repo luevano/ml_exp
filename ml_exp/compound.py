@@ -21,13 +21,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
+from ml_exp.data import NUCLEAR_CHARGE
 
 
 class Compound:
     def __init__(self, xyz=None):
+        # empty_array = np.asarray([], dtype=float)
+
         self.n = None
         self.atoms = None
+        self.atoms_nc = None
         self.coordinates = None
+        self.energy = None
+
+        self.coulomb_matrix = None
+        self.lennard_jones_matrix = None
+        self.bob = None
 
         if xyz is not None:
             self.read_xyz(xyz)
@@ -42,10 +51,12 @@ class Compound:
 
         self.n = int(lines[0])
         self.atoms = []
+        self.atoms_nc = np.empty(self.n, dtype=int)
         self.coordinates = np.empty((self.n, 3), dtype=float)
 
         for i, atom in enumerate(lines[2:self.n + 2]):
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
+            self.atoms_nc[i] = NUCLEAR_CHARGE[atom_d[0]]
             self.coordinates[i] = np.asarray(atom_d[1:4], dtype=float)
