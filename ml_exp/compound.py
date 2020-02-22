@@ -22,7 +22,7 @@ SOFTWARE.
 """
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
-from ml_exp.representations import coulomb_matrix
+from ml_exp.representations import coulomb_matrix, lennard_jones_matrix
 
 
 class Compound:
@@ -40,8 +40,8 @@ class Compound:
         self.coordinates = None
         self.energy = None
 
-        self.coulomb_matrix = None
-        self.lennard_jones_matrix = None
+        self.c_matrix = None
+        self.lj_matrix = None
         self.bob = None
 
         if xyz is not None:
@@ -57,11 +57,36 @@ class Compound:
         as_eig: if the representation should be as the eigenvalues.
         bhor_ru: if radius units should be in bohr's radius units.
         """
-        self.coulomb_matrix = coulomb_matrix(self.coordinates,
-                                             self.atoms_nc,
-                                             size=size,
-                                             as_eig=as_eig,
-                                             bhor_ru=bohr_ru)
+        self.c_matrix = coulomb_matrix(self.coordinates,
+                                       self.atoms_nc,
+                                       size=size,
+                                       as_eig=as_eig,
+                                       bhor_ru=bohr_ru)
+
+    def gen_lj(self,
+               diag_value=None,
+               sigma=1.0,
+               epsilon=1.0,
+               size=23,
+               as_eig=True,
+               bohr_ru=False):
+        """
+        Generate the Lennard-Jones Matrix for the compund.
+        diag_value: if special diagonal value is to be used.
+        sigma: sigma value.
+        epsilon: epsilon value.
+        size: compound size.
+        as_eig: if the representation should be as the eigenvalues.
+        bhor_ru: if radius units should be in bohr's radius units.
+        """
+        self.lj_matrix = lennard_jones_matrix(self.coordinates,
+                                              self.atoms_nc,
+                                              diag_value=diag_value,
+                                              sigma=sigma,
+                                              epsilon=epsilon,
+                                              size=size,
+                                              as_eig=as_eig,
+                                              bhor_ru=bohr_ru)
 
     def read_xyz(self,
                  filename):
