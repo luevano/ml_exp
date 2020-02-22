@@ -21,9 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from ml_exp.compound import Compound
-from ml_exp.representations import coulomb_matrix
+from ml_exp.representations import coulomb_matrix, lennard_jones_matrix
 
 # If somebody does "from package import *", this is what they will
 # be able to access:
 __all__ = ['Compound',
-           'coulomb_matrix']
+           'coulomb_matrix',
+           'lennard_jones_matrix']
