@@ -48,8 +48,8 @@ def coulomb_matrix(coords,
                          size. Arrays are not of the right shape.')
 
     if size < n:
-        print('Error. Compound size (n) is greater han (size). Using (n)\
-              instead of (size).')
+        print('Error. Compound size (n) is greater han (size). Using (n)',
+              'instead of (size).')
         size = n
 
     cm = np.zeros((size, size), dtype=float)
@@ -115,8 +115,8 @@ def lennard_jones_matrix(coords,
                          size. Arrays are not of the right shape.')
 
     if size < n:
-        print('Error. Compound size (n) is greater han (size). Using (n)\
-              instead of (size).')
+        print('Error. Compound size (n) is greater han (size). Using (n)',
+              'instead of (size).')
         size = n
 
     lj = np.zeros((size, size), dtype=float)
@@ -137,10 +137,10 @@ def lennard_jones_matrix(coords,
                 # so no square root is calculated.
                 # Conversion factor is included in r^2.
                 rv = xyz_i - xyz_j
-                r = sigma*np.linalg.norm(rv)/cr
+                r = np.linalg.norm(rv)/cr
 
                 # 1/r^n
-                r_2 = 1/r**2
+                r_2 = sigma**2/r**2
                 r_6 = r_2**3
                 r_12 = r_6**2
                 lj[i, j] = (4*epsilon*(r_12 - r_6))
@@ -204,9 +204,9 @@ def first_neighbor_matrix(coords,
     cs_bond = sorted(['C', 'S'])
 
     if use_forces:
-        fnm = np.empty((n, n), dtype=float)
+        fnm = np.zeros((n, n), dtype=float)
     else:
-        fnm = np.empty((n, n), dtype=int)
+        fnm = np.zeros((n, n), dtype=int)
 
     bonds = []
     forces = []

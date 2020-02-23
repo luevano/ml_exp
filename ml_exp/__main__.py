@@ -28,6 +28,3 @@ if __name__ == '__main__':
     test = []
     for i in range(1, 10):
         test.append(Compound(f'/home/luevano/py/ml_exp/data/qm7/000{i}.xyz'))
-        test[i-1].gen_cm(size=1, as_eig=False)
-        test[i-1].gen_ljm(size=1, as_eig=False)
-        test[i-1].gen_am(size=1)
