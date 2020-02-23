@@ -273,9 +273,9 @@ def adjacency_matrix(fnm,
         size = n
 
     if forces:
-        am = np.empty((size, size), dtype=float)
+        am = np.zeros((size, size), dtype=float)
     else:
-        am = np.empty((size, size), dtype=int)
+        am = np.zeros((size, size), dtype=int)
 
     for i, bond_i in enumerate(bonds):
         for j, bond_j in enumerate(bonds):
