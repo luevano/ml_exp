@@ -39,7 +39,8 @@ class Compound:
         self.atoms = None
         self.atoms_nc = None
         self.coordinates = None
-        self.energy = None
+        self.pbe0 = None
+        self.delta = None
 
         self.cm = None
         self.ljm = None
@@ -91,8 +92,8 @@ class Compound:
                                         bohr_ru=bohr_ru)
 
     def gen_am(self,
-               use_forces=False,
                size=23,
+               use_forces=False,
                bohr_ru=False):
         """
         Generate the Adjacency Matrix for the compund.
@@ -104,6 +105,7 @@ class Compound:
         fnm, bonds, forces = first_neighbor_matrix(self.coordinates,
                                                    self.atoms_nc,
                                                    self.atoms,
+                                                   size=size,
                                                    use_forces=use_forces,
                                                    bohr_ru=bohr_ru)
 

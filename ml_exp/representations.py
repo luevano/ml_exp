@@ -39,7 +39,7 @@ def coulomb_matrix(coords,
     if bohr_ru:
         cr = 0.52917721067
     else:
-        cr = 1
+        cr = 1.0
 
     n = coords.shape[0]
 
@@ -106,7 +106,7 @@ def lennard_jones_matrix(coords,
     if bohr_ru:
         cr = 0.52917721067
     else:
-        cr = 1
+        cr = 1.0
 
     n = coords.shape[0]
 
@@ -168,6 +168,7 @@ def lennard_jones_matrix(coords,
 def first_neighbor_matrix(coords,
                           nc,
                           atoms,
+                          size=23,
                           use_forces=False,
                           bohr_ru=False):
     """
@@ -179,7 +180,7 @@ def first_neighbor_matrix(coords,
     bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
-            C: 1.20 - 1.53 A
+            C: 1.20 - 1.54 A (Edited to 1.19 - 1.54 A)
             H: 1.06 - 1.12 A
             O: 1.43 - 2.15 A
             N: 1.47 - 2.10 A
@@ -188,13 +189,18 @@ def first_neighbor_matrix(coords,
     if bohr_ru:
         cr = 0.52917721067
     else:
-        cr = 1
+        cr = 1.0
 
     n = coords.shape[0]
 
     if not n == nc.shape[0]:
         raise ValueError('Compound size is different than the nuclear charge\
                          size. Arrays are not of the right shape.')
+
+    if size < n:
+        print('Error. Compound size (n) is greater han (size). Using (n)',
+              'instead of (size).')
+        size = n
 
     # Possible bonds.
     cc_bond = sorted(['C', 'C'])
@@ -203,16 +209,12 @@ def first_neighbor_matrix(coords,
     cn_bond = sorted(['C', 'N'])
     cs_bond = sorted(['C', 'S'])
 
-    if use_forces:
-        fnm = np.zeros((n, n), dtype=float)
-    else:
-        fnm = np.zeros((n, n), dtype=int)
+    fnm = np.zeros((size, size), dtype=float)
 
     bonds = []
     forces = []
     for i, xyz_i in enumerate(coords):
         for j, xyz_j in enumerate(coords):
-
             # Ignore the diagonal.
             if i != j:
                 bond = sorted([atoms[i], atoms[j]])
@@ -220,7 +222,7 @@ def first_neighbor_matrix(coords,
                 r = np.linalg.norm(rv)/cr
 
                 # Check for each type of bond.
-                if (cc_bond == bond) and (r >= 1.20 and r <= 1.53):
+                if (cc_bond == bond) and (r >= 1.19 and r <= 1.54):
                     fnm[i, j] = 1.0
                     if j > i:
                         bonds.append((i, j))
@@ -257,7 +259,7 @@ def first_neighbor_matrix(coords,
 def adjacency_matrix(fnm,
                      bonds,
                      forces,
-                     size=23):
+                     size=22):
     """
     Calculates the adjacency matrix given the bond list.
     fnm: first neighbour matrix.
@@ -272,10 +274,7 @@ def adjacency_matrix(fnm,
               instead of (size).')
         size = n
 
-    if forces:
-        am = np.zeros((size, size), dtype=float)
-    else:
-        am = np.zeros((size, size), dtype=int)
+    am = np.zeros((size, size), dtype=float)
 
     for i, bond_i in enumerate(bonds):
         for j, bond_j in enumerate(bonds):
