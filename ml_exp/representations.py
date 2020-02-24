@@ -310,8 +310,8 @@ def check_bond(bags,
 
 def bag_of_stuff(cm,
                  atoms,
-                 stuff='bonds',
-                 size=23):
+                 size=23,
+                 stuff='bonds'):
     """
     Creates the Bag of Bonds using the Coulomb Matrix.
     cm: coulomb matrix.
@@ -322,6 +322,10 @@ def bag_of_stuff(cm,
         raise ValueError('Coulomb Matrix hasn\'t been initialized for the \
 current compound.')
 
+    if cm.ndim == 1:
+        raise ValueError('Coulomb Matrix (CM) dimension is 1. Maybe it was \
+generated as the vector of eigenvalues, try (re-)generating the CM.')
+
     n = len(atoms)
 
     if size < n:
@@ -330,7 +334,7 @@ current compound.')
         size = n
 
     # Bond max length, calculated using only the upper triangular matrix.
-    bond_size = (size * size - size)/2 + size
+    bond_size = int((size * size - size)/2 + size)
 
     # List where each bag data is stored.
     bags = []
@@ -362,19 +366,19 @@ current compound.')
                 bonds.append(''.join(sorted([a_i, a_j])))
     bonds = atom_list + bonds
 
-    # Create the final vector for the bob.
-    bob = np.zeros(bond_size, dtype=float)
+    # Create the final vector for the bos.
+    bos = np.zeros(bond_size, dtype=float)
     c_i = 0
     for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)
         if checker[0]:
             for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
-                # Use c_i as the index for bob if the zero padding should
+                # Use c_i as the index for bos if the zero padding should
                 # be at the end of the vector instead of between each bond.
-                bob[i*size + j] = num
+                bos[i*size + j] = num
                 c_i += 1
         else:
             print(f'Error. Bond {bond} from bond list coudn\'t be found',
                   'in the bags list. This could be a case where the atom',
                   'is only present oncce in the molecule.')
-    return bob
+    return bos

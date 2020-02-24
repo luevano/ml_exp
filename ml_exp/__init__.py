@@ -22,7 +22,7 @@ SOFTWARE.
 """
 from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    first_neighbor_matrix, adjacency_matrix
+    first_neighbor_matrix, adjacency_matrix, check_bond, bag_of_stuff
 
 # If somebody does "from package import *", this is what they will
 # be able to access:
@@ -30,4 +30,6 @@ __all__ = ['Compound',
            'coulomb_matrix',
            'lennard_jones_matrix',
            'first_neighbor_matrix',
-           'adjacency_matrix']
+           'adjacency_matrix',
+           'check_bond',
+           'bag_of_stuff']

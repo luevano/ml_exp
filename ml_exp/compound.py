@@ -23,7 +23,7 @@ SOFTWARE.
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    first_neighbor_matrix, adjacency_matrix
+    first_neighbor_matrix, adjacency_matrix, bag_of_stuff
 
 
 class Compound:
@@ -114,6 +114,19 @@ class Compound:
                                    bonds,
                                    forces,
                                    size=size)
+
+    def gen_bos(self,
+                size=23,
+                stuff='bonds'):
+        """
+        Generate the Bag of Stuff for the compound.
+        size: compound size.
+        stuff: elements of the bag, by default the known bag of bonds.
+        """
+        self.bos = bag_of_stuff(self.cm,
+                                self.atoms,
+                                size=size,
+                                stuff=stuff)
 
     def read_xyz(self,
                  filename):
