@@ -45,8 +45,8 @@ def coulomb_matrix(coords,
     n = coords.shape[0]
 
     if not n == nc.shape[0]:
-        raise ValueError('Compound size is different than the nuclear charge\
-                         size. Arrays are not of the right shape.')
+        raise ValueError('Compound size is different than the nuclear charge \
+size. Arrays are not of the right shape.')
 
     if size < n:
         print('Error. Compound size (n) is greater han (size). Using (n)',
@@ -112,8 +112,8 @@ def lennard_jones_matrix(coords,
     n = coords.shape[0]
 
     if not n == nc.shape[0]:
-        raise ValueError('Compound size is different than the nuclear charge\
-                         size. Arrays are not of the right shape.')
+        raise ValueError('Compound size is different than the nuclear charge \
+size. Arrays are not of the right shape.')
 
     if size < n:
         print('Error. Compound size (n) is greater han (size). Using (n)',
@@ -195,8 +195,8 @@ def first_neighbor_matrix(coords,
     n = coords.shape[0]
 
     if not n == nc.shape[0]:
-        raise ValueError('Compound size is different than the nuclear charge\
-                         size. Arrays are not of the right shape.')
+        raise ValueError('Compound size is different than the nuclear charge \
+size. Arrays are not of the right shape.')
 
     if size < n:
         print('Error. Compound size (n) is greater han (size). Using (n)',
@@ -295,7 +295,7 @@ def check_bond(bags,
     """
     Checks if a bond is in a bag.
     bags: list of bags, containing a bag per entry, which in turn
-    contains a list of bond-values.
+        contains a list of bond-values.
     bond: bond to check.
     """
     if bags == []:
@@ -308,50 +308,49 @@ def check_bond(bags,
     return False, None
 
 
-def bob(c_matrix,
-        atoms,
-        max_n=25,
-        max_bond_len=325):
+def bag_of(cm,
+           atoms,
+           stuff='bonds',
+           size=23):
     """
-    Creates the bag of bond using the coulomb matrix data.
-    c_matrix: coulomb matrix.
+    Creates the Bag of Bonds using the Coulomb Matrix.
+    cm: coulomb matrix.
     atoms: list of atoms.
-    max_n: maximum amount of atoms.
-    max_bond_len: maximum amount of bonds in molecule.
+    size: maximum amount of atoms.
     """
+    if cm is None:
+        raise ValueError('Coulomb Matrix hasn\'t been initialized for the \
+current compound.')
+
     n = len(atoms)
-    bond_n = (n * n - n) / 2 + n
-    n_r = range(n)
 
-    if max_n < n:
-        print(''.join(['Error. Molecule matrix dimension (mol_n) is ',
-                       'greater than max_len. Using mol_n.']))
-        max_n = n
+    if size < n:
+        print('Error. Compound size (n) is greater han (size). Using (n)',
+              'instead of (size).')
+        size = n
 
-    if max_bond_len < bond_n:
-        print(''.join(['Error. Molecule bond lenght (bond_n) is ',
-                       'greater than max_bond_len. Using bond_n.']))
-        max_bond_len = bond_n
+    # Bond max length, calculated using only the upper triangular matrix.
+    bond_size = (size * size - size)/2 + size
 
     # List where each bag data is stored.
     bags = []
-    for i in n_r:
-        for j in n_r:
+    for i, atom_i in enumerate(atoms):
+        for j, atom_j in enumerate(atoms):
             # Work only in the upper triangle of the coulomb matrix.
             if j >= i:
                 # Get the string of the current bond.
                 if i == j:
-                    current_bond = atoms[i]
+                    current_bond = atom_i
                 else:
-                    current_bond = ''.join(sorted([atoms[i], atoms[j]]))
+                    current_bond = ''.join(sorted([atom_i, atom_j]))
 
                 # Check if that bond is already in a bag.
                 checker = check_bond(bags, current_bond)
                 # Either create a new bag or add values to an existing one.
                 if not checker[0]:
-                    bags.append([current_bond, c_matrix[i, j]])
+                    bags.append([current_bond, cm[i, j]])
                 else:
-                    bags[checker[1]].append(c_matrix[i, j])
+                    bags[checker[1]].append(cm[i, j])
 
     # Create the actual bond list ordered.
     atom_counter = Counter(atoms)
@@ -364,7 +363,7 @@ def bob(c_matrix,
     bonds = atom_list + bonds
 
     # Create the final vector for the bob.
-    bob = array(zeros(max_bond_len), dtype=float)
+    bob = np.zeros(bond_size, dtype=float)
     c_i = 0
     for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)
@@ -372,12 +371,10 @@ def bob(c_matrix,
             for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
                 # Use c_i as the index for bob if the zero padding should
                 # be at the end of the vector instead of between each bond.
-                bob[i*max_n + j] = num
+                bob[i*size + j] = num
                 c_i += 1
-        # This is set to false because this was a debugging measure.
         else:
-            print(''.join([f'Error. Bond {bond} from bond list coudn\'t',
-                           ' be found in the bags list. This could be',
-                           ' a case where the atom is only present once',
-                           ' in the molecule.']))
+            print(f'Error. Bond {bond} from bond list coudn\'t be found',
+                  'in the bags list. This could be a case where the atom',
+                  'is only present oncce in the molecule.')
     return bob

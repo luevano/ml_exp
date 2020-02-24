@@ -45,7 +45,7 @@ class Compound:
         self.cm = None
         self.ljm = None
         self.am = None
-        self.bob = None
+        self.bos = None
 
         if xyz is not None:
             self.read_xyz(xyz)
