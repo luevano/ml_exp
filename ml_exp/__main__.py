@@ -20,16 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from ml_exp.compound import Compound
+# from ml_exp.compound import Compound
 
 
 if __name__ == '__main__':
-    print('Initialize test')
-    mol_name = '/home/luevano/py/ml_exp/data/qm7/0004.xyz'
-    mol = Compound(mol_name)
-    mol.gen_cm(size=1, as_eig=False)
-    mol.gen_ljm(size=1, as_eig=False)
-    mol.gen_am(size=1)
-
-    print(mol.n, mol.atoms, mol.atoms_nc)
-    print(mol.am)
+    print('OK!')
