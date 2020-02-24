@@ -308,15 +308,15 @@ def check_bond(bags,
     return False, None
 
 
-def bag_of(cm,
-           atoms,
-           stuff='bonds',
-           size=23):
+def bag_of_stuff(cm,
+                 atoms,
+                 stuff='bonds',
+                 size=23):
     """
     Creates the Bag of Bonds using the Coulomb Matrix.
     cm: coulomb matrix.
     atoms: list of atoms.
-    size: maximum amount of atoms.
+    size: compound size.
     """
     if cm is None:
         raise ValueError('Coulomb Matrix hasn\'t been initialized for the \
