@@ -27,10 +27,10 @@ import random
 
 # 'hof_qm7.txt.txt' retrieved from
 # https://github.com/qmlcode/tutorial
-def read_db_data(zi_data,
-                 data_path,
-                 r_seed=111,
-                 return_atoms=False):
+def qm7db(zi_data,
+          data_path,
+          r_seed=111,
+          return_atoms=False):
     """
     Reads molecule database and extracts
     its contents as usable variables.
