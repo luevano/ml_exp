@@ -24,6 +24,7 @@ from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
     first_neighbor_matrix, adjacency_matrix, check_bond, bag_of_stuff
 from ml_exp.math import cholesky_solve
+from ml_exp.qm7db import qm7db
 
 __all__ = ['Compound',
            'coulomb_matrix',
@@ -32,4 +33,5 @@ __all__ = ['Compound',
            'adjacency_matrix',
            'check_bond',
            'bag_of_stuff',
-           'cholesky_solve']
+           'cholesky_solve',
+           'qm7db']
