@@ -23,6 +23,7 @@ SOFTWARE.
 from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
     first_neighbor_matrix, adjacency_matrix, check_bond, bag_of_stuff
+from ml_exp.math import cholesky_solve
 
 # If somebody does "from package import *", this is what they will
 # be able to access:
@@ -32,4 +33,5 @@ __all__ = ['Compound',
            'first_neighbor_matrix',
            'adjacency_matrix',
            'check_bond',
-           'bag_of_stuff']
+           'bag_of_stuff',
+           'cholesky_solve']
