@@ -49,9 +49,9 @@ def qm7db(nc,
         compounds[i].pbe0 = float(line[1])
         compounds[i].delta = float(line[1]) - float(line[2])
 
-    # Shuffle the compounds list
-    random.seed(r_seed)
-    random.shuffle(compounds)
+    if is_shuffled:
+        random.seed(r_seed)
+        random.shuffle(compounds)
 
     e_pbe0 = np.array([compound.pbe0 for compound in compounds], dtype=float)
     e_delta = np.array([compound.delta for compound in compounds], dtype=float)

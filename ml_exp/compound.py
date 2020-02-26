@@ -36,6 +36,7 @@ class Compound:
         self.name = None
 
         self.n = None
+        self.extra = None  # In case a comment is in the compound file.
         self.atoms = None
         self.atoms_nc = None
         self.coordinates = None
@@ -139,6 +140,7 @@ class Compound:
 
         self.name = filename.split('/')[-1]
         self.n = int(lines[0])
+        self.extra = lines[1]
         self.atoms = []
         self.atoms_nc = np.empty(self.n, dtype=int)
         self.coordinates = np.empty((self.n, 3), dtype=float)
