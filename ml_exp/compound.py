@@ -33,7 +33,7 @@ class Compound:
         Initialization of the Compound.
         xyz: (path to) the xyz file.
         """
-        # empty_array = np.asarray([], dtype=float)
+        self.name = None
 
         self.n = None
         self.atoms = None
@@ -137,6 +137,7 @@ class Compound:
         with open(filename, 'r') as f:
             lines = f.readlines()
 
+        self.name = filename.split('/')[-1]
         self.n = int(lines[0])
         self.atoms = []
         self.atoms_nc = np.empty(self.n, dtype=int)

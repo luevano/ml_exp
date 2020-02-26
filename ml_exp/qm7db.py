@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from ml_exp.compound import Compound
 import numpy as np
 import random
 
@@ -28,72 +29,31 @@ import random
 # https://github.com/qmlcode/tutorial
 def qm7db(nc,
           db_path='data',
+          is_shuffled=True,
           r_seed=111):
     """
     Creates a list of compounds with the qm7 database.
     nc: dictionary containing nuclear charge data.
     db_path: path to the database directory.
+    is_shuffled: if the resulting list of compounds should be shuffled.
     r_seed: random seed to use for the shuffling.
     """
-
     fname = f'{db_path}/hof_qm7.txt'
     with open(fname, 'r') as f:
         lines = f.readlines()
 
-    # Temporary energy dictionary.
-    energy_temp = dict()
+    compounds = []
+    for i, line in enumerate(lines):
+        line = line.split()
+        compounds.append(Compound(f'{db_path}/{line[0]}'))
+        compounds[i].pbe0 = float(line[1])
+        compounds[i].delta = float(line[1]) - float(line[2])
 
-    for line in lines:
-        xyz_data = line.split()
-
-        xyz_name = xyz_data[0]
-        hof = float(xyz_data[1])
-        dftb = float(xyz_data[2])
-        # print(xyz_name, hof, dftb)
-
-        energy_temp[xyz_name] = np.array([hof, hof - dftb])
-
-    # Use a random seed.
+    # Shuffle the compounds list
     random.seed(r_seed)
+    random.shuffle(compounds)
 
-    et_keys = list(energy_temp.keys())
-    random.shuffle(et_keys)
+    e_pbe0 = np.array([compound.pbe0 for compound in compounds], dtype=float)
+    e_delta = np.array([compound.delta for compound in compounds], dtype=float)
 
-    # Temporary energy dictionary, shuffled.
-    energy_temp_shuffled = dict()
-    for key in et_keys:
-        energy_temp_shuffled.update({key: energy_temp[key]})
-
-    mol_data = []
-    mol_nc_data = []
-    atoms = []
-    # Actual reading of the xyz files.
-    for i, k in enumerate(energy_temp_shuffled.keys()):
-        with open(k, 'r') as xyz_file:
-            lines = xyz_file.readlines()
-
-        len_lines = len(lines)
-        mol_temp_data = []
-        mol_nc_temp_data = np.array(np.zeros(len_lines-2))
-        atoms_temp = []
-        for j, line in enumerate(lines[2:len_lines]):
-            line_list = line.split()
-
-            atoms_temp.append(line_list[0])
-            mol_nc_temp_data[j] = float(nc[line_list[0]])
-            line_data = np.array(np.asarray(line_list[1:4], dtype=float))
-            mol_temp_data.append(line_data)
-
-        mol_data.append(mol_temp_data)
-        mol_nc_data.append(mol_nc_temp_data)
-        atoms.append(atoms_temp)
-
-    # Convert everything to a numpy array.
-    molecules = np.array([np.array(mol) for mol in mol_data])
-    nuclear_charge = np.array([nc_d for nc_d in mol_nc_data])
-    energy_pbe0 = np.array([energy_temp_shuffled[k][0]
-                            for k in energy_temp_shuffled.keys()])
-    energy_delta = np.array([energy_temp_shuffled[k][1]
-                             for k in energy_temp_shuffled.keys()])
-
-    return molecules, nuclear_charge, energy_pbe0, energy_delta, atoms
+    return compounds, e_pbe0, e_delta
