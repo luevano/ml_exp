@@ -20,7 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import os
 import numpy as np
 import random
 
@@ -28,19 +27,18 @@ import random
 # 'hof_qm7.txt.txt' retrieved from
 # https://github.com/qmlcode/tutorial
 def qm7db(nc,
-          data_path,
+          db_path='data',
           r_seed=111):
     """
     Creates a list of compounds with the qm7 database.
     nc: dictionary containing nuclear charge data.
-    data_path: path to the data directory.
+    db_path: path to the database directory.
     r_seed: random seed to use for the shuffling.
     """
-    os.chdir(data_path)
 
-    fname = 'hof_qm7.txt'
-    with open(fname, 'r') as infile:
-        lines = infile.readlines()
+    fname = f'{db_path}/hof_qm7.txt'
+    with open(fname, 'r') as f:
+        lines = f.readlines()
 
     # Temporary energy dictionary.
     energy_temp = dict()
