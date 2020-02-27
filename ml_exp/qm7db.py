@@ -25,15 +25,11 @@ import numpy as np
 import random
 
 
-# 'hof_qm7.txt.txt' retrieved from
-# https://github.com/qmlcode/tutorial
-def qm7db(nc,
-          db_path='data',
+def qm7db(db_path='data',
           is_shuffled=True,
           r_seed=111):
     """
     Creates a list of compounds with the qm7 database.
-    nc: dictionary containing nuclear charge data.
     db_path: path to the database directory.
     is_shuffled: if the resulting list of compounds should be shuffled.
     r_seed: random seed to use for the shuffling.
