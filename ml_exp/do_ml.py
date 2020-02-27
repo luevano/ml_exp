@@ -31,19 +31,19 @@ from ml_exp.qm7db import qm7db
 def simple_ml(descriptors,
               energies,
               training_size,
-              identifier=None,
               test_size=None,
               sigma=1000.0,
+              identifier=None,
               show_msgs=True):
     """
     Basic ML methodology for a single descriptor type.
     descriptors: array of descriptors.
     energies: array of energies.
     training_size: size of the training set to use.
-    identifier: string with the name of the descriptor used.
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
     sigma: depth of the kernel.
+    identifier: string with the name of the descriptor used.
     show_msgs: if debug messages should be shown.
     NOTE: identifier is just a string and is only for identification purposes.
     Also, training is done with the first part of the data and
@@ -86,7 +86,7 @@ def simple_ml(descriptors,
 
     mae = np.mean(np.abs(Y_predicted - Y_test))
     if show_msgs:
-        printc('\tMAE for {identifier}: {mae:.4f}', 'GREEN')
+        printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
 
     toc = time.perf_counter()
     tictoc = toc - tic
@@ -102,20 +102,27 @@ def simple_ml(descriptors,
 def do_ml(db_path='data',
           is_shuffled=True,
           r_seed=111,
+          diag_value=None,
+          lj_sigma=1.0,
+          lj_epsilon=1.0,
+          use_forces=False,
+          size=23,
+          as_eig=True,
+          bohr_ru=False,
+          sigma=1000.0,
           show_msgs=True):
     """
     Main function that does the whole ML process.
-    training_size: minimum training size.
-    test_size: size of the test set to use. If no size is given,
-        the last remaining molecules are used.
-    ljm_diag_value: if a special diagonal value should be used in lj matrix.
-    ljm_sigma: sigma value for lj matrix.
-    ljm_epsilon: epsilon value for lj matrix.
+    db_path: path to the database directory.
+    is_shuffled: if the resulting list of compounds should be shuffled.
     r_seed: random seed to use for the shuffling.
-    save_benchmarks: if benchmarks should be saved.
-    size: maximum amount of atoms in molecule.
-    as_eig: if data should be returned as matrix or array of eigenvalues.
-    bohr_radius_units: if units should be in bohr's radius units.
+    diag_value: if special diagonal value is to be used.
+    lj_sigma: sigma value.
+    lj_epsilon: epsilon value.
+    use_forces: if the use of forces instead of k_cx should be used.
+    size: compound size.
+    as_eig: if the representation should be as the eigenvalues.
+    bohr_ru: if radius units should be in bohr's radius units.
     sigma: depth of the kernel.
     show_msgs: if debug messages should be shown.
     """
@@ -134,16 +141,40 @@ def do_ml(db_path='data',
     # Matrices calculation.
     tic = time.perf_counter()
     for compound in compounds:
-        compound.gen_cm()
-        compound.gen_ljm()
-        compound.gen_am()
+        compound.gen_cm(size=size,
+                        as_eig=as_eig,
+                        bohr_ru=bohr_ru)
+        compound.gen_ljm(diag_value=diag_value,
+                         sigma=lj_sigma,
+                         epsilon=lj_epsilon,
+                         size=size,
+                         as_eig=as_eig,
+                         bohr_ru=bohr_ru)
+        compound.gen_am(use_forces=use_forces,
+                        size=size,
+                        bohr_ru=bohr_ru)
+
+    # Create a numpy array for the descriptors.
+    cm_data = np.array([compound.cm for compound in compounds], dtype=float)
+    ljm_data = np.array([compound.ljm for compound in compounds], dtype=float)
+    am_data = np.array([compound.cm for compound in compounds], dtype=float)
+    print(cm_data.shape, ljm_data.shape, am_data.shape)
+
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
         printc(f'Matrices calculation took {tictoc:.4f} seconds.', 'CYAN')
 
     # ML calculation.
-    # PLHLDR
+    # CM
+    cm_mae, cm_tictoc = simple_ml(cm_data,
+                                  energy_pbe0,
+                                  training_size=5000,
+                                  test_size=1500,
+                                  sigma=1000.0,
+                                  identifier='CM',
+                                  show_msgs=show_msgs)
+    print(cm_mae, cm_tictoc)
 
     # End of program
     end_time = time.perf_counter()

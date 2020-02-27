@@ -36,9 +36,9 @@ def gaussian_kernel(X1,
     inv_sigma = -0.5 / (sigma*sigma)
 
     K = np.zeros((X1.shape[0], X2.shape[0]), dtype=float)
-    for i in X1:
-        for j in X2:
-            f_norm = np.linalg.norm(i - j)
+    for i, x1 in enumerate(X1):
+        for j, x2 in enumerate(X2):
+            f_norm = np.linalg.norm(x1 - x2)
             # print(f_norm)
             K[i, j] = math.exp(inv_sigma * f_norm)
 

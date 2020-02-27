@@ -93,8 +93,8 @@ class Compound:
                                         bohr_ru=bohr_ru)
 
     def gen_am(self,
-               size=23,
                use_forces=False,
+               size=23,
                bohr_ru=False):
         """
         Generate the Adjacency Matrix for the compund.
