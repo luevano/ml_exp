@@ -20,30 +20,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import math
+from ml_exp.compound import Compound
 import numpy as np
-from ml_exp.frob_norm import frob_norm
+import random
 
 
-def gauss_kernel(X_1, X_2, sigma):
+def qm7db(db_path='data',
+          is_shuffled=True,
+          r_seed=111):
     """
-    Calculates the Gaussian Kernel.
-    X_1: first representations.
-    X_2: second representations.
-    sigma: kernel width.
+    Creates a list of compounds with the qm7 database.
+    db_path: path to the database directory.
+    is_shuffled: if the resulting list of compounds should be shuffled.
+    r_seed: random seed to use for the shuffling.
     """
-    x1_l = len(X_1)
-    x1_range = range(x1_l)
-    x2_l = len(X_2)
-    x2_range = range(x2_l)
+    fname = f'{db_path}/hof_qm7.txt'
+    with open(fname, 'r') as f:
+        lines = f.readlines()
 
-    inv_sigma = -0.5 / (sigma*sigma)
+    compounds = []
+    for i, line in enumerate(lines):
+        line = line.split()
+        compounds.append(Compound(f'{db_path}/{line[0]}'))
+        compounds[i].pbe0 = float(line[1])
+        compounds[i].delta = float(line[1]) - float(line[2])
 
-    K = np.zeros((x1_l, x2_l))
-    for i in x1_range:
-        for j in x2_range:
-            f_norm = frob_norm(X_1[i] - X_2[j])
-            # print(f_norm)
-            K[i, j] = math.exp(inv_sigma * f_norm)
+    if is_shuffled:
+        random.seed(r_seed)
+        random.shuffle(compounds)
 
-    return K
+    e_pbe0 = np.array([compound.pbe0 for compound in compounds], dtype=float)
+    e_delta = np.array([compound.delta for compound in compounds], dtype=float)
+
+    return compounds, e_pbe0, e_delta

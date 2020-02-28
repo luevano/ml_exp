@@ -21,31 +21,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
+import numpy as np
 
 
-def frob_norm(array):
+def gaussian_kernel(X1,
+                    X2,
+                    sigma):
     """
-    Calculates the frobenius norm of a given array or matrix.
-    array: array of data.
+    Calculates the Gaussian Kernel.
+    X1: first representations.
+    X2: second representations.
+    sigma: kernel width.
     """
+    inv_sigma = -0.5 / (sigma*sigma)
 
-    arr_sh_len = len(array.shape)
-    arr_range = range(len(array))
-    fn = 0.0
+    K = np.zeros((X1.shape[0], X2.shape[0]), dtype=float)
+    for i, x1 in enumerate(X1):
+        for j, x2 in enumerate(X2):
+            f_norm = np.linalg.norm(x1 - x2)
+            # print(f_norm)
+            K[i, j] = math.exp(inv_sigma * f_norm)
 
-    # If it is a 'vector'.
-    if arr_sh_len == 1:
-        for i in arr_range:
-            fn += array[i]*array[i]
-
-        return math.sqrt(fn)
-
-    # If it is a matrix.
-    elif arr_sh_len == 2:
-        for i in arr_range:
-            for j in arr_range:
-                fn += array[i, j]*array[i, j]
-
-        return math.sqrt(fn)
-    else:
-        print('Error. Array size greater than 2 ({}).'.format(arr_sh_len))
+    return K

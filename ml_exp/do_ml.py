@@ -22,206 +22,206 @@ SOFTWARE.
 """
 import time
 import numpy as np
-from multiprocessing import Process, Pipe
 from ml_exp.misc import printc
-from ml_exp.gauss_kernel import gauss_kernel
-from ml_exp.cholesky_solve import cholesky_solve
-from ml_exp.read_qm7_data import read_qm7_data
-from ml_exp.parallel_create_matrices import parallel_create_matrices
+from ml_exp.kernels import gaussian_kernel
+from ml_exp.math import cholesky_solve
+from ml_exp.qm7db import qm7db
 
 
-def ml(desc_data,
-       energy_data,
-       training_size,
-       desc_type=None,
-       pipe=None,
-       test_size=None,
-       sigma=1000.0,
-       show_msgs=True):
+def simple_ml(descriptors,
+              energies,
+              training_size,
+              test_size=None,
+              sigma=1000.0,
+              identifier=None,
+              show_msgs=True):
     """
-    Does the ML methodology.
-    desc_data: descriptor (or representation) data.
-    energy_data: energy data associated with desc_data.
+    Basic ML methodology for a single descriptor type.
+    descriptors: array of descriptors.
+    energies: array of energies.
     training_size: size of the training set to use.
-    desc_type: string with the name of the descriptor used.
-    pipe: for multiprocessing purposes. Sends the data calculated
-        through a pipe.
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
     sigma: depth of the kernel.
-    show_msgs: Show debug messages or not.
-    NOTE: desc_type is just a string and is only for identification purposes.
+    identifier: string with the name of the descriptor used.
+    show_msgs: if debug messages should be shown.
+    NOTE: identifier is just a string and is only for identification purposes.
     Also, training is done with the first part of the data and
-    testing with the ending part of the data.
+        testing with the ending part of the data.
     """
     tic = time.perf_counter()
     # Initial calculations for later use.
-    d_len = len(desc_data)
-    e_len = len(energy_data)
+    data_size = descriptors.shape[0]
 
-    if not desc_type:
-        desc_type = 'NOT SPECIFIED'
+    if not identifier:
+        identifier = 'NOT SPECIFIED'
 
-    if d_len != e_len:
-        printc(''.join(['ERROR. Descriptor data size different ',
-                        'than energy data size.']), 'RED')
-        return None
+    if not data_size == energies.shape[0]:
+        raise ValueError('Energies size is different than descriptors size.')
 
-    if training_size >= d_len:
-        printc('ERROR. Training size greater or equal than data size.', 'RED')
-        return None
+    if training_size >= data_size:
+        raise ValueError('Training size is greater or equal to the data size.')
 
+    # If test_size is not set, it is set to a maximum size of 1500.
     if not test_size:
-        test_size = d_len - training_size
+        test_size = data_size - training_size
         if test_size > 1500:
             test_size = 1500
 
     if show_msgs:
-        printc('{} ML started.'.format(desc_type), 'GREEN')
-        printc('\tTraining size: {}'.format(training_size), 'CYAN')
-        printc('\tTest size: {}'.format(test_size), 'CYAN')
-        printc('\tSigma: {}'.format(sigma), 'CYAN')
+        printc(f'{identifier} ML started.', 'GREEN')
+        printc(f'\tTraining size: {training_size}', 'CYAN')
+        printc(f'\tTest size: {test_size}', 'CYAN')
+        printc(f'\tSigma: {test_size}', 'CYAN')
 
-    X_training = desc_data[:training_size]
-    Y_training = energy_data[:training_size]
-    K_training = gauss_kernel(X_training, X_training, sigma)
-    alpha_ = cholesky_solve(K_training, Y_training)
+    X_training = descriptors[:training_size]
+    Y_training = energies[:training_size]
+    K_training = gaussian_kernel(X_training, X_training, sigma)
+    alpha = cholesky_solve(K_training, Y_training)
 
-    X_test = desc_data[-test_size:]
-    Y_test = energy_data[-test_size:]
-    K_test = gauss_kernel(X_test, X_training, sigma)
-    Y_predicted = np.dot(K_test, alpha_)
+    X_test = descriptors[-test_size:]
+    Y_test = energies[-test_size:]
+    K_test = gaussian_kernel(X_test, X_training, sigma)
+    Y_predicted = np.dot(K_test, alpha)
 
     mae = np.mean(np.abs(Y_predicted - Y_test))
     if show_msgs:
-        printc('\tMAE for {}: {:.4f}'.format(desc_type, mae), 'GREEN')
+        printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
 
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
-        printc('\t{} ML took {:.4f} seconds.'.format(desc_type, tictoc),
-               'GREEN')
-        printc('\t\tTraining size: {}'.format(training_size), 'CYAN')
-        printc('\t\tTest size: {}'.format(test_size), 'CYAN')
-        printc('\t\tSigma: {}'.format(sigma), 'CYAN')
-
-    if pipe:
-        pipe.send([desc_type, training_size, test_size, sigma, mae, tictoc])
+        printc(f'\t{identifier} ML took {tictoc:.4f} seconds.', 'GREEN')
+        printc(f'\t\tTraining size: {training_size}', 'CYAN')
+        printc(f'\t\tTest size: {test_size}', 'CYAN')
+        printc(f'\t\tSigma: {sigma}', 'CYAN')
 
     return mae, tictoc
 
 
-def do_ml(min_training_size,
-          max_training_size=None,
-          training_increment_size=500,
-          test_size=None,
-          ljm_diag_value=None,
-          ljm_sigma=1.0,
-          ljm_epsilon=1.0,
+def do_ml(db_path='data',
+          is_shuffled=True,
           r_seed=111,
-          save_benchmarks=False,
-          max_len=25,
+          diag_value=None,
+          lj_sigma=1.0,
+          lj_epsilon=1.0,
+          use_forces=False,
+          stuff='bonds',
+          size=23,
           as_eig=True,
-          bohr_radius_units=False,
+          bohr_ru=False,
+          training_size=1500,
+          test_size=None,
           sigma=1000.0,
+          identifiers=["CM"],
           show_msgs=True):
     """
     Main function that does the whole ML process.
-    min_training_size: minimum training size.
-    max_training_size: maximum training size.
-    training_increment_size: training increment size.
+    db_path: path to the database directory.
+    is_shuffled: if the resulting list of compounds should be shuffled.
+    r_seed: random seed to use for the shuffling.
+    diag_value: if special diagonal value is to be used.
+    lj_sigma: sigma value.
+    lj_epsilon: epsilon value.
+    use_forces: if the use of forces instead of k_cx should be used.
+    stuff: elements of the bag, by default the known bag of bonds.
+    size: compound size.
+    as_eig: if the representation should be as the eigenvalues.
+    bohr_ru: if radius units should be in bohr's radius units.
+    training_size: size of the training set to use.
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
-    ljm_diag_value: if a special diagonal value should be used in lj matrix.
-    ljm_sigma: sigma value for lj matrix.
-    ljm_epsilon: epsilon value for lj matrix.
-    r_seed: random seed to use for the shuffling.
-    save_benchmarks: if benchmarks should be saved.
-    max_len: maximum amount of atoms in molecule.
-    as_eig: if data should be returned as matrix or array of eigenvalues.
-    bohr_radius_units: if units should be in bohr's radius units.
     sigma: depth of the kernel.
-    show_msgs: Show debug messages or not.
+    identifiers: list of names (strings) of descriptors to use.
+    show_msgs: if debug messages should be shown.
     """
-    # Initialization time.
+    if type(identifiers) != list:
+        raise TypeError('\'identifiers\' is not a list.')
+
     init_time = time.perf_counter()
-    if not max_training_size:
-        max_training_size = min_training_size + training_increment_size
 
     # Data reading.
-    molecules, nuclear_charge, energy_pbe0, energy_delta =\
-        read_qm7_data(r_seed=r_seed)
+    tic = time.perf_counter()
+    compounds, energy_pbe0, energy_delta = qm7db(db_path=db_path,
+                                                 is_shuffled=is_shuffled,
+                                                 r_seed=r_seed)
+    toc = time.perf_counter()
+    tictoc = toc - tic
+    if show_msgs:
+        printc(f'Data reading took {tictoc:.4f} seconds.', 'CYAN')
 
     # Matrices calculation.
-    cm_data, ljm_data = parallel_create_matrices(molecules,
-                                                 nuclear_charge,
-                                                 ljm_diag_value,
-                                                 ljm_sigma,
-                                                 ljm_epsilon,
-                                                 max_len,
-                                                 as_eig,
-                                                 bohr_radius_units)
+    tic = time.perf_counter()
+    for compound in compounds:
+        if 'CM' in identifiers:
+            compound.gen_cm(size=size,
+                            as_eig=as_eig,
+                            bohr_ru=bohr_ru)
+        if 'LJM' in identifiers:
+            compound.gen_ljm(diag_value=diag_value,
+                             sigma=lj_sigma,
+                             epsilon=lj_epsilon,
+                             size=size,
+                             as_eig=as_eig,
+                             bohr_ru=bohr_ru)
+        if 'AM' in identifiers:
+            compound.gen_am(use_forces=use_forces,
+                            size=size,
+                            bohr_ru=bohr_ru)
+        if 'BOS' in identifiers:
+            compound.gen_bos(size=size,
+                             stuff=stuff)
+
+    # Create a numpy array for the descriptors.
+    if 'CM' in identifiers:
+        cm_data = np.array([comp.cm for comp in compounds], dtype=float)
+    if 'LJM' in identifiers:
+        ljm_data = np.array([comp.ljm for comp in compounds], dtype=float)
+    if 'AM' in identifiers:
+        am_data = np.array([comp.cm for comp in compounds], dtype=float)
+    if 'BOS' in identifiers:
+        bos_data = np.array([comp.bos for comp in compounds], dtype=float)
+
+    toc = time.perf_counter()
+    tictoc = toc - tic
+    if show_msgs:
+        printc(f'Matrices calculation took {tictoc:.4f} seconds.', 'CYAN')
 
     # ML calculation.
-    procs = []
-    cm_pipes = []
-    ljm_pipes = []
-    for i in range(min_training_size,
-                   max_training_size + 1,
-                   training_increment_size):
-        cm_recv, cm_send = Pipe(False)
-        p1 = Process(target=ml,
-                     args=(cm_data,
-                           energy_pbe0,
-                           i,
-                           'CM',
-                           cm_send,
-                           test_size,
-                           sigma,
-                           show_msgs))
-        procs.append(p1)
-        cm_pipes.append(cm_recv)
-        p1.start()
-
-        ljm_recv, ljm_send = Pipe(False)
-        p2 = Process(target=ml,
-                     args=(ljm_data,
-                           energy_pbe0,
-                           i,
-                           'L-JM',
-                           ljm_send,
-                           test_size,
-                           sigma,
-                           show_msgs))
-        procs.append(p2)
-        ljm_pipes.append(ljm_recv)
-        p2.start()
-
-    cm_bench_results = []
-    ljm_bench_results = []
-    for cd_pipe, ljd_pipe in zip(cm_pipes, ljm_pipes):
-        cm_bench_results.append(cd_pipe.recv())
-        ljm_bench_results.append(ljd_pipe.recv())
-
-    for proc in procs:
-        proc.join()
-
-    if save_benchmarks:
-        with open('data\\benchmarks.csv', 'a') as save_file:
-            # save_file.write(''.join(['ml_type,tr_size,te_size,kernel_s,',
-            #                          'mae,time,lj_s,lj_e,date_ran\n']))
-            ltime = time.localtime()[:3][::-1]
-            ljm_se = ',' + str(ljm_sigma) + ',' + str(ljm_epsilon) + ','
-            date = '/'.join([str(field) for field in ltime])
-            for cm, ljm, in zip(cm_bench_results, ljm_bench_results):
-                cm_text = ','.join([str(field) for field in cm])\
-                    + ',' + date + '\n'
-                ljm_text = ','.join([str(field) for field in ljm])\
-                    + ljm_se + date + '\n'
-                save_file.write(cm_text)
-                save_file.write(ljm_text)
+    if 'CM' in identifiers:
+        cm_mae, cm_tictoc = simple_ml(cm_data,
+                                      energy_pbe0,
+                                      training_size=training_size,
+                                      test_size=test_size,
+                                      sigma=sigma,
+                                      identifier='CM',
+                                      show_msgs=show_msgs)
+    if 'LJM' in identifiers:
+        ljm_mae, ljm_tictoc = simple_ml(ljm_data,
+                                        energy_pbe0,
+                                        training_size=training_size,
+                                        test_size=test_size,
+                                        sigma=sigma,
+                                        identifier='LJM',
+                                        show_msgs=show_msgs)
+    if 'AM' in identifiers:
+        am_mae, am_tictoc = simple_ml(am_data,
+                                      energy_pbe0,
+                                      training_size=training_size,
+                                      test_size=test_size,
+                                      sigma=sigma,
+                                      identifier='CM',
+                                      show_msgs=show_msgs)
+    if 'BOS' in identifiers:
+        bos_mae, bos_tictoc = simple_ml(bos_data,
+                                        energy_pbe0,
+                                        training_size=training_size,
+                                        test_size=test_size,
+                                        sigma=sigma,
+                                        identifier='CM',
+                                        show_msgs=show_msgs)
 
     # End of program
     end_time = time.perf_counter()
-    printc('Program took {:.4f} seconds.'.format(end_time - init_time),
-           'CYAN')
+    totaltime = end_time - init_time
+    printc(f'Program took {totaltime:.4f} seconds.', 'CYAN')

@@ -29,29 +29,25 @@ init()
 def printc(text, color):
     """
     Prints texts normaly, but in color. Using colorama.
-    text: string with the text to print.
+    text: text to print.
     color: color to be used, same as available in colorama.
     """
-    color_dic = {'BLACK': Fore.BLACK,
-                 'RED': Fore.RED,
-                 'GREEN': Fore.GREEN,
-                 'YELLOW': Fore.YELLOW,
-                 'BLUE': Fore.BLUE,
-                 'MAGENTA': Fore.MAGENTA,
-                 'CYAN': Fore.CYAN,
-                 'WHITE': Fore.WHITE,
-                 'RESET': Fore.RESET}
+    color = color.upper()
+    colors = {'BLACK': Fore.BLACK,
+              'RED': Fore.RED,
+              'GREEN': Fore.GREEN,
+              'YELLOW': Fore.YELLOW,
+              'BLUE': Fore.BLUE,
+              'MAGENTA': Fore.MAGENTA,
+              'CYAN': Fore.CYAN,
+              'WHITE': Fore.WHITE,
+              'RESET': Fore.RESET}
 
-    color_dic_keys = color_dic.keys()
-    if color not in color_dic_keys:
-        print(Fore.RED
-              + '\'{}\' not found, using default color.'.format(color)
-              + Style.RESET_ALL)
-        actual_color = Fore.RESET
-    else:
-        actual_color = color_dic[color]
+    av_colors = colors.keys()
+    if color not in av_colors:
+        raise KeyError(f'{color} not found.')
 
-    print(actual_color + text + Style.RESET_ALL)
+    print(colors[color] + text + Style.RESET_ALL)
 
 
 def plot_benchmarks():
