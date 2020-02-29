@@ -116,18 +116,15 @@ class Compound:
                                    forces,
                                    size=size)
 
-    def gen_bos(self,
-                size=23,
-                stuff='bonds'):
+    def gen_bob(self,
+                size=23):
         """
         Generate the Bag of Stuff for the compound.
         size: compound size.
-        stuff: elements of the bag, by default the known bag of bonds.
         """
         self.bos = bag_of_stuff(self.cm,
                                 self.atoms,
-                                size=size,
-                                stuff=stuff)
+                                size=size)
 
     def read_xyz(self,
                  filename):

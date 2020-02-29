@@ -308,10 +308,9 @@ def check_bond(bags,
     return False, None
 
 
-def bag_of_stuff(cm,
+def bag_of_bonds(cm,
                  atoms,
-                 size=23,
-                 stuff='bonds'):
+                 size=23):
     """
     Creates the Bag of Bonds using the Coulomb Matrix.
     cm: coulomb matrix.
@@ -366,19 +365,19 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
                 bonds.append(''.join(sorted([a_i, a_j])))
     bonds = atom_list + bonds
 
-    # Create the final vector for the bos.
-    bos = np.zeros(bond_size, dtype=float)
+    # Create the final vector for the bob.
+    bob = np.zeros(bond_size, dtype=float)
     c_i = 0
     for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)
         if checker[0]:
             for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
-                # Use c_i as the index for bos if the zero padding should
+                # Use c_i as the index for bob if the zero padding should
                 # be at the end of the vector instead of between each bond.
-                bos[i*size + j] = num
+                bob[i*size + j] = num
                 c_i += 1
         else:
             print(f'Error. Bond {bond} from bond list coudn\'t be found',
                   'in the bags list. This could be a case where the atom',
                   'is only present oncce in the molecule.')
-    return bos
+    return bob
