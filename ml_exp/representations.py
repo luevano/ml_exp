@@ -242,12 +242,14 @@ size. Arrays are not of the right shape.')
 def adjacency_matrix(fnm,
                      bonds,
                      forces,
+                     use_forces=False,
                      size=22):
     """
     Calculates the adjacency matrix given the bond list.
     fnm: first neighbour matrix.
     bonds: list of bonds (tuple of indexes).
     forces: list of forces.
+    use_forces: if the use of forces instead of k_cx should be used.
     size: compund size.
     """
     n = len(bonds)
@@ -264,7 +266,7 @@ def adjacency_matrix(fnm,
             # Ignore the diagonal.
             if i != j:
                 if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
-                    if forces:
+                    if use_forces:
                         am[i, j] = np.dot(forces[i], forces[j])
                     else:
                         am[i, j] = fnm[bond_i[0], bond_i[1]]
