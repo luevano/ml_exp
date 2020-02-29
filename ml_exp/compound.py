@@ -130,6 +130,7 @@ class Compound:
         self.am = adjacency_matrix(self.fnm,
                                    self.bonds,
                                    self.bonds_f,
+                                   use_forces=use_forces,
                                    size=size)
 
     def gen_bob(self,
