@@ -124,7 +124,7 @@ def do_ml(db_path='data',
           test_size=None,
           sigma=1000.0,
           opt=True,
-          identifiers=["CM"],
+          identifiers=['CM'],
           show_msgs=True):
     """
     Main function that does the whole ML process.
