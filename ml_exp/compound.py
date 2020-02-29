@@ -33,20 +33,29 @@ class Compound:
         Initialization of the Compound.
         xyz: (path to) the xyz file.
         """
+        # General compound data.
         self.name = None
-
         self.n = None
-        self.extra = None  # In case a comment is in the compound file.
+        self.extra = None
         self.atoms = None
         self.atoms_nc = None
         self.coordinates = None
         self.pbe0 = None
         self.delta = None
 
+        # Computed data.
         self.cm = None
         self.ljm = None
+        self.fnm = None
         self.am = None
         self.bob = None
+        self.bo_atoms = None
+        self.bok_cx = None
+        self.bof = None
+
+        # Helping data.
+        self.bonds = None
+        self.forces = None
 
         if xyz is not None:
             self.read_xyz(xyz)
@@ -103,17 +112,17 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         # First, generate the first neighor matrix.
-        fnm, bonds, forces = first_neighbor_matrix(self.coordinates,
-                                                   self.atoms_nc,
-                                                   self.atoms,
-                                                   size=size,
-                                                   use_forces=use_forces,
-                                                   bohr_ru=bohr_ru)
-
+        fnm_data = first_neighbor_matrix(self.coordinates,
+                                         self.atoms_nc,
+                                         self.atoms,
+                                         size=size,
+                                         use_forces=use_forces,
+                                         bohr_ru=bohr_ru)
+        self.fnm, self.bonds, self.forces = fnm_data
         # Now, generate the adjacency matrix.
-        self.am = adjacency_matrix(fnm,
-                                   bonds,
-                                   forces,
+        self.am = adjacency_matrix(self.fnm,
+                                   self.bonds,
+                                   self.forces,
                                    size=size)
 
     def gen_bob(self,

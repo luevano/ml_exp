@@ -181,11 +181,11 @@ def first_neighbor_matrix(coords,
     bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
-            C: 1.20 - 1.54 A (Edited to 1.19 - 1.54 A)
-            H: 1.06 - 1.12 A
-            O: 1.43 - 2.15 A
-            N: 1.47 - 2.10 A
-            S: 1.81 - 2.55 A
+            C: 1.19 - 1.54 A, 1.0
+            H: 1.06 - 1.12 A, 1.0
+            O: 1.43 - 2.15 A, 0.8
+            N: 1.47 - 2.10 A, 1.0
+            S: 1.81 - 2.55 A, 0.7
     """
     if bohr_ru:
         cr = 0.52917721067
@@ -210,7 +210,11 @@ size. Arrays are not of the right shape.')
     cn_bond = sorted(['C', 'N'])
     cs_bond = sorted(['C', 'S'])
 
-    fnm = np.zeros((size, size), dtype=float)
+    pos_bonds = {cc_bond: (1.19, 1.54), ch_bond: (1.06, 1.12),
+                 co_bond: (1.43, 2.15), cn_bond: (1.47, 2.19),
+                 cs_bond: (1.81, 2.55)}
+
+    fnm = np.zeros((size, size), dtype=bool)
 
     bonds = []
     forces = []
@@ -219,39 +223,15 @@ size. Arrays are not of the right shape.')
             # Ignore the diagonal.
             if i != j:
                 bond = sorted([atoms[i], atoms[j]])
-                rv = xyz_i - xyz_j
-                r = np.linalg.norm(rv)/cr
-
-                # Check for each type of bond.
-                if (cc_bond == bond) and (r >= 1.19 and r <= 1.54):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (co_bond == bond) and (r >= 1.43 and r <= 2.15):
-                    fnm[i, j] = 0.8
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (cn_bond == bond) and (r >= 1.47 and r <= 2.10):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (cs_bond == bond) and (r >= 1.81 and r <= 2.55):
-                    fnm[i, j] = 0.7
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
+                if bond in pos_bonds.keys():
+                    r_min = pos_bonds[bond][0]
+                    r_max = pos_bonds[bond][1]
+                    rv = xyz_i - xyz_j
+                    r = np.linalg.norm(rv)/cr
+                    if r >= r_min and r <= r_max:
+                        fnm[i, j] = True
+                        if j > i:
+                            bonds.append((i, j))
                             forces.append(rv*nc[i]*nc[j]/r**3)
 
     return fnm, bonds, forces
