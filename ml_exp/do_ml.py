@@ -225,7 +225,7 @@ def do_ml(db_path='data',
                                       test_size=test_size,
                                       sigma=sigma,
                                       opt=opt,
-                                      identifier='CM',
+                                      identifier='AM',
                                       show_msgs=show_msgs)
     if 'BOB' in identifiers:
         bob_mae, bob_tictoc = simple_ml(bob_data,
@@ -234,7 +234,7 @@ def do_ml(db_path='data',
                                         test_size=test_size,
                                         sigma=sigma,
                                         opt=opt,
-                                        identifier='CM',
+                                        identifier='BOB',
                                         show_msgs=show_msgs)
 
     # End of program

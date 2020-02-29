@@ -358,10 +358,12 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
             for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
                 # Use c_i as the index for bob if the zero padding should
                 # be at the end of the vector instead of between each bond.
-                bob[i*size + j] = num
+                # bob[i*size + j] = num
+                bob[c_i] = num
                 c_i += 1
         else:
             print(f'Error. Bond {bond} from bond list coudn\'t be found',
                   'in the bags list. This could be a case where the atom',
                   'is only present oncce in the molecule.')
+
     return bob
