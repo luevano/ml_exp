@@ -153,15 +153,15 @@ class Compound:
             lines = f.readlines()
 
         self.name = filename.split('/')[-1]
-        self.n = int(lines[0])
+        self.n = np.int32(lines[0])
         self.extra = lines[1]
         self.atoms = []
-        self.atoms_nc = np.empty(self.n, dtype=int)
-        self.coordinates = np.empty((self.n, 3), dtype=float)
+        self.atoms_nc = np.empty(self.n, dtype=np.int64)
+        self.coordinates = np.empty((self.n, 3), dtype=np.float64)
 
         for i, atom in enumerate(lines[2:self.n + 2]):
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
             self.atoms_nc[i] = NUCLEAR_CHARGE[atom_d[0]]
-            self.coordinates[i] = np.asarray(atom_d[1:4], dtype=float)
+            self.coordinates[i] = np.asarray(atom_d[1:4], dtype=np.float64)

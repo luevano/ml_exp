@@ -53,7 +53,7 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    cm = np.zeros((size, size), dtype=float)
+    cm = np.zeros((size, size), dtype=np.float64)
 
     # Actual calculation of the coulomb matrix.
     for i, xyz_i in enumerate(coords):
@@ -120,7 +120,7 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    lj = np.zeros((size, size), dtype=float)
+    lj = np.zeros((size, size), dtype=np.float64)
 
     # Actual calculation of the lennard-jones matrix.
     for i, xyz_i in enumerate(coords):
@@ -259,7 +259,7 @@ def adjacency_matrix(fnm,
               instead of (size).')
         size = n
 
-    am = np.zeros((size, size), dtype=float)
+    am = np.zeros((size, size), dtype=np.float64)
 
     for i, bond_i in enumerate(bonds):
         for j, bond_j in enumerate(bonds):
@@ -317,7 +317,7 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
         size = n
 
     # Bond max length, calculated using only the upper triangular matrix.
-    bond_size = int((size * size - size)/2 + size)
+    bond_size = np.int32((size * size - size)/2 + size)
 
     # List where each bag data is stored.
     bags = []
@@ -350,7 +350,7 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
     bonds = atom_list + bonds
 
     # Create the final vector for the bob.
-    bob = np.zeros(bond_size, dtype=float)
+    bob = np.zeros(bond_size, dtype=np.float64)
     c_i = 0
     for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)

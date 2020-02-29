@@ -186,13 +186,13 @@ def do_ml(db_path='data',
 
     # Create a numpy array for the descriptors.
     if 'CM' in identifiers:
-        cm_data = np.array([comp.cm for comp in compounds], dtype=float)
+        cm_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
     if 'LJM' in identifiers:
-        ljm_data = np.array([comp.ljm for comp in compounds], dtype=float)
+        ljm_data = np.array([comp.ljm for comp in compounds], dtype=np.float64)
     if 'AM' in identifiers:
-        am_data = np.array([comp.cm for comp in compounds], dtype=float)
+        am_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
     if 'BOB' in identifiers:
-        bob_data = np.array([comp.bob for comp in compounds], dtype=float)
+        bob_data = np.array([comp.bob for comp in compounds], dtype=np.float64)
 
     toc = time.perf_counter()
     tictoc = toc - tic
