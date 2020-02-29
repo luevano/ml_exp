@@ -23,7 +23,7 @@ SOFTWARE.
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    get_helping_data, adjacency_matrix, bag_of_stuff
+    get_helping_data, adjacency_matrix, bag_of_bonds
 
 
 class Compound:
@@ -139,7 +139,7 @@ class Compound:
         Generate the Bag of Stuff for the compound.
         size: compound size.
         """
-        self.bob = bag_of_stuff(self.cm,
+        self.bob = bag_of_bonds(self.cm,
                                 self.atoms,
                                 size=size)
 
