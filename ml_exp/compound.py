@@ -111,13 +111,13 @@ class Compound:
         size: compund size.
         bohr_ru: if radius units should be in bohr's radius units.
         """
-        hp = get_helping_data(self.coordinates,
+        hd = get_helping_data(self.coordinates,
                               self.nc,
                               self.atoms,
                               size=size,
                               bohr_ru=bohr_ru)
 
-        self.fnm, self.bonds, self.bonds_i, self.bonds_k, self.bonds_f = hp
+        self.fnm, self.bonds, self.bonds_i, self.bonds_k, self.bonds_f = hd
 
     def gen_am(self,
                use_forces=False,
