@@ -37,9 +37,9 @@ def gaussian_kernel(X1,
     """
     i_sigma = -0.5 / (sigma*sigma)
 
-    K = np.zeros((X1.shape[0], X2.shape[0]), dtype=float)
+    K = np.zeros((X1.shape[0], X2.shape[0]), dtype=np.float64)
     if opt:
-        # Faster way of calculating the kernel.
+        # Faster way of calculating the kernel (no numba support).
         for i, x1 in enumerate(X1):
             if X2.ndim == 3:
                 norm = np.linalg.norm(X2 - x1, axis=(1, 2))
@@ -50,7 +50,6 @@ def gaussian_kernel(X1,
         for i, x1 in enumerate(X1):
             for j, x2 in enumerate(X2):
                 f_norm = np.linalg.norm(x2 - x1)
-                # print(f_norm)
                 K[i, j] = math.exp(i_sigma * f_norm**2)
 
     return K
