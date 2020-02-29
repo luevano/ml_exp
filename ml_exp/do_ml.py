@@ -168,9 +168,8 @@ def do_ml(db_path='data',
             compound.gen_am(use_forces=use_forces,
                             size=size,
                             bohr_ru=bohr_ru)
-        if 'BOS' in identifiers:
-            compound.gen_bos(size=size,
-                             stuff=stuff)
+        if 'BOB' in identifiers:
+            compound.gen_bob(size=size)
 
     # Create a numpy array for the descriptors.
     if 'CM' in identifiers:
@@ -179,8 +178,8 @@ def do_ml(db_path='data',
         ljm_data = np.array([comp.ljm for comp in compounds], dtype=float)
     if 'AM' in identifiers:
         am_data = np.array([comp.cm for comp in compounds], dtype=float)
-    if 'BOS' in identifiers:
-        bos_data = np.array([comp.bos for comp in compounds], dtype=float)
+    if 'BOB' in identifiers:
+        bob_data = np.array([comp.bob for comp in compounds], dtype=float)
 
     toc = time.perf_counter()
     tictoc = toc - tic
@@ -212,8 +211,8 @@ def do_ml(db_path='data',
                                       sigma=sigma,
                                       identifier='CM',
                                       show_msgs=show_msgs)
-    if 'BOS' in identifiers:
-        bos_mae, bos_tictoc = simple_ml(bos_data,
+    if 'BOB' in identifiers:
+        bob_mae, bob_tictoc = simple_ml(bob_data,
                                         energy_pbe0,
                                         training_size=training_size,
                                         test_size=test_size,
