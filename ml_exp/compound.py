@@ -23,7 +23,7 @@ SOFTWARE.
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    first_neighbor_matrix, adjacency_matrix, bag_of_stuff
+    get_helping_data, adjacency_matrix, bag_of_stuff
 
 
 class Compound:
@@ -46,7 +46,6 @@ class Compound:
         # Computed data.
         self.cm = None
         self.ljm = None
-        self.fnm = None
         self.am = None
         self.bob = None
         self.bo_atoms = None
@@ -54,8 +53,11 @@ class Compound:
         self.bof = None
 
         # Helping data.
+        self.fnm = None
         self.bonds = None
-        self.forces = None
+        self.bonds_i = None
+        self.bonds_k = None
+        self.bonds_f = None
 
         if xyz is not None:
             self.read_xyz(xyz)
@@ -101,28 +103,34 @@ class Compound:
                                         as_eig=as_eig,
                                         bohr_ru=bohr_ru)
 
-    def gen_am(self,
-               use_forces=False,
+    def gen_hd(self,
                size=23,
                bohr_ru=False):
+        """
+        Generate the helping data for use in Adjacency Matrix, for example.
+        size: compund size.
+        bohr_ru: if radius units should be in bohr's radius units.
+        """
+        hp = get_helping_data(self.coordinates,
+                              self.nc,
+                              self.atoms,
+                              size=size,
+                              bohr_ru=bohr_ru)
+
+        self.fnm, self.bonds, self.bonds_i, self.bonds_k, self.bonds_f = hp
+
+    def gen_am(self,
+               use_forces=False,
+               size=23):
         """
         Generate the Adjacency Matrix for the compund.
         use_forces: if the use of forces instead of k_cx should be used.
         size: compound size.
         bohr_ru: if radius units should be in bohr's radius units.
         """
-        # First, generate the first neighor matrix.
-        fnm_data = first_neighbor_matrix(self.coordinates,
-                                         self.atoms_nc,
-                                         self.atoms,
-                                         size=size,
-                                         use_forces=use_forces,
-                                         bohr_ru=bohr_ru)
-        self.fnm, self.bonds, self.forces = fnm_data
-        # Now, generate the adjacency matrix.
         self.am = adjacency_matrix(self.fnm,
                                    self.bonds,
-                                   self.forces,
+                                   self.bonds_f,
                                    size=size)
 
     def gen_bob(self,

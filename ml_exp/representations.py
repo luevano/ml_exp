@@ -166,18 +166,17 @@ size. Arrays are not of the right shape.')
         return lj
 
 
-def first_neighbor_matrix(coords,
-                          nc,
-                          atoms,
-                          size=23,
-                          use_forces=False,
-                          bohr_ru=False):
+def get_helping_data(coords,
+                     nc,
+                     atoms,
+                     size=23,
+                     bohr_ru=False):
     """
-    Creates the First Neighbor Matrix from the molecule data given.
+    Creates helping data such as the First Neighbor Matrix for the compound.
     coords: compound coordinates.
     nc: nuclear charge data.
     atoms: list of atoms.
-    use_forces: if the use of forces instead of k_cx should be used.
+    size: compund size.
     bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
@@ -209,15 +208,15 @@ size. Arrays are not of the right shape.')
     co_bond = sorted(['C', 'O'])
     cn_bond = sorted(['C', 'N'])
     cs_bond = sorted(['C', 'S'])
-
-    pos_bonds = {cc_bond: (1.19, 1.54), ch_bond: (1.06, 1.12),
-                 co_bond: (1.43, 2.15), cn_bond: (1.47, 2.19),
-                 cs_bond: (1.81, 2.55)}
+    pos_bonds = {cc_bond: (1.19, 1.54, 1.0), ch_bond: (1.06, 1.12, 1.0),
+                 co_bond: (1.43, 2.15, 0.8), cn_bond: (1.47, 2.19, 1.0),
+                 cs_bond: (1.81, 2.55, 0.7)}
 
     fnm = np.zeros((size, size), dtype=bool)
-
     bonds = []
-    forces = []
+    bonds_i = []
+    bonds_k = []
+    bonds_f = []
     for i, xyz_i in enumerate(coords):
         for j, xyz_j in enumerate(coords):
             # Ignore the diagonal.
@@ -230,11 +229,14 @@ size. Arrays are not of the right shape.')
                     r = np.linalg.norm(rv)/cr
                     if r >= r_min and r <= r_max:
                         fnm[i, j] = True
+                        # Only add to the list if in the upper triangle.
                         if j > i:
-                            bonds.append((i, j))
-                            forces.append(rv*nc[i]*nc[j]/r**3)
+                            bonds.append(bond)
+                            bonds_i.append((i, j))
+                            bonds_k.append(pos_bonds[bond][2])
+                            bonds_f.append(rv*nc[i]*nc[j]/r**3)
 
-    return fnm, bonds, forces
+    return fnm, bonds, bonds_i, bonds_k, bonds_f
 
 
 def adjacency_matrix(fnm,
