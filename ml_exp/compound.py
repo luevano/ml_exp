@@ -46,7 +46,7 @@ class Compound:
         self.cm = None
         self.ljm = None
         self.am = None
-        self.bos = None
+        self.bob = None
 
         if xyz is not None:
             self.read_xyz(xyz)
@@ -122,7 +122,7 @@ class Compound:
         Generate the Bag of Stuff for the compound.
         size: compound size.
         """
-        self.bos = bag_of_stuff(self.cm,
+        self.bob = bag_of_stuff(self.cm,
                                 self.atoms,
                                 size=size)
 
