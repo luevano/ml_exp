@@ -126,7 +126,6 @@ class Compound:
         Generate the Adjacency Matrix for the compund.
         use_forces: if the use of forces instead of k_cx should be used.
         size: compound size.
-        bohr_ru: if radius units should be in bohr's radius units.
         """
         self.am = adjacency_matrix(self.fnm,
                                    self.bonds,
