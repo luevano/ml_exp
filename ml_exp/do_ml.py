@@ -22,9 +22,9 @@ SOFTWARE.
 """
 import time
 import numpy as np
+from scipy import linalg as LA
 from ml_exp.misc import printc
 from ml_exp.kernels import gaussian_kernel
-from ml_exp.math import cholesky_solve
 from ml_exp.qm7db import qm7db
 
 
@@ -82,8 +82,7 @@ def simple_ml(descriptors,
                                  X_training,
                                  sigma,
                                  opt=opt)
-    alpha = cholesky_solve(K_training,
-                           Y_training)
+    alpha = LA.cho_solve(LA.cho_factor(K_training), Y_training)
 
     X_test = descriptors[-test_size:]
     Y_test = energies[-test_size:]
