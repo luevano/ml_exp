@@ -167,15 +167,15 @@ size. Arrays are not of the right shape.')
 
 
 def get_helping_data(coords,
-                     nc,
                      atoms,
+                     nc,
                      size=23,
                      bohr_ru=False):
     """
     Creates helping data such as the First Neighbor Matrix for the compound.
     coords: compound coordinates.
-    nc: nuclear charge data.
     atoms: list of atoms.
+    nc: nuclear charge data.
     size: compund size.
     bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
@@ -203,11 +203,11 @@ size. Arrays are not of the right shape.')
         size = n
 
     # Possible bonds.
-    cc_bond = sorted(['C', 'C'])
-    ch_bond = sorted(['C', 'H'])
-    co_bond = sorted(['C', 'O'])
-    cn_bond = sorted(['C', 'N'])
-    cs_bond = sorted(['C', 'S'])
+    cc_bond = ''.join(sorted(['C', 'C']))
+    ch_bond = ''.join(sorted(['C', 'H']))
+    co_bond = ''.join(sorted(['C', 'O']))
+    cn_bond = ''.join(sorted(['C', 'N']))
+    cs_bond = ''.join(sorted(['C', 'S']))
     pos_bonds = {cc_bond: (1.19, 1.54, 1.0), ch_bond: (1.06, 1.12, 1.0),
                  co_bond: (1.43, 2.15, 0.8), cn_bond: (1.47, 2.19, 1.0),
                  cs_bond: (1.81, 2.55, 0.7)}
@@ -221,7 +221,7 @@ size. Arrays are not of the right shape.')
         for j, xyz_j in enumerate(coords):
             # Ignore the diagonal.
             if i != j:
-                bond = sorted([atoms[i], atoms[j]])
+                bond = ''.join(sorted([atoms[i], atoms[j]]))
                 if bond in pos_bonds.keys():
                     r_min = pos_bonds[bond][0]
                     r_max = pos_bonds[bond][1]
@@ -239,21 +239,25 @@ size. Arrays are not of the right shape.')
     return fnm, bonds, bonds_i, bonds_k, bonds_f
 
 
-def adjacency_matrix(fnm,
-                     bonds,
-                     forces,
+def adjacency_matrix(bonds_i,
+                     bonds_k,
+                     bonds_f,
                      use_forces=False,
-                     size=22):
+                     size=23):
     """
     Calculates the adjacency matrix given the bond list.
-    fnm: first neighbour matrix.
-    bonds: list of bonds (tuple of indexes).
-    forces: list of forces.
+    bonds: list of bond names.
+    bonds_i: list of bond indexes (tuple of indexes).
+    bonds_k: list of k_cx values.
+    bonds_f: list of force values.
     use_forces: if the use of forces instead of k_cx should be used.
     size: compund size.
     """
-    n = len(bonds)
+    if bonds_i is None:
+        raise ValueError('The helping data hasn\'t been initialized for\
+the current compound.')
 
+    n = len(bonds_i)
     if size < n:
         print('Error. Compound size (n) is greater han (size). Using (n)\
               instead of (size).')
@@ -261,15 +265,15 @@ def adjacency_matrix(fnm,
 
     am = np.zeros((size, size), dtype=np.float64)
 
-    for i, bond_i in enumerate(bonds):
-        for j, bond_j in enumerate(bonds):
+    for i, bond_i in enumerate(bonds_i):
+        for j, bond_j in enumerate(bonds_i):
             # Ignore the diagonal.
             if i != j:
                 if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
                     if use_forces:
-                        am[i, j] = np.dot(forces[i], forces[j])
+                        am[i, j] = np.dot(bonds_f[i], bonds_f[j])
                     else:
-                        am[i, j] = fnm[bond_i[0], bond_i[1]]
+                        am[i, j] = bonds_k[i]
 
     return am
 

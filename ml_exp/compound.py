@@ -38,7 +38,7 @@ class Compound:
         self.n = None
         self.extra = None
         self.atoms = None
-        self.atoms_nc = None
+        self.nc = None
         self.coordinates = None
         self.pbe0 = None
         self.delta = None
@@ -73,7 +73,7 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         self.cm = coulomb_matrix(self.coordinates,
-                                 self.atoms_nc,
+                                 self.nc,
                                  size=size,
                                  as_eig=as_eig,
                                  bohr_ru=bohr_ru)
@@ -95,7 +95,7 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         self.ljm = lennard_jones_matrix(self.coordinates,
-                                        self.atoms_nc,
+                                        self.nc,
                                         diag_value=diag_value,
                                         sigma=sigma,
                                         epsilon=epsilon,
@@ -112,8 +112,8 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         hd = get_helping_data(self.coordinates,
-                              self.nc,
                               self.atoms,
+                              self.nc,
                               size=size,
                               bohr_ru=bohr_ru)
 
@@ -127,8 +127,8 @@ class Compound:
         use_forces: if the use of forces instead of k_cx should be used.
         size: compound size.
         """
-        self.am = adjacency_matrix(self.fnm,
-                                   self.bonds,
+        self.am = adjacency_matrix(self.bonds_i,
+                                   self.bonds_k,
                                    self.bonds_f,
                                    use_forces=use_forces,
                                    size=size)
@@ -156,12 +156,12 @@ class Compound:
         self.n = np.int32(lines[0])
         self.extra = lines[1]
         self.atoms = []
-        self.atoms_nc = np.empty(self.n, dtype=np.int64)
+        self.nc = np.empty(self.n, dtype=np.int64)
         self.coordinates = np.empty((self.n, 3), dtype=np.float64)
 
         for i, atom in enumerate(lines[2:self.n + 2]):
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
-            self.atoms_nc[i] = NUCLEAR_CHARGE[atom_d[0]]
+            self.nc[i] = NUCLEAR_CHARGE[atom_d[0]]
             self.coordinates[i] = np.asarray(atom_d[1:4], dtype=np.float64)

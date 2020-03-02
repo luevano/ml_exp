@@ -176,11 +176,13 @@ def do_ml(db_path='data',
                              size=size,
                              as_eig=as_eig,
                              bohr_ru=bohr_ru)
+        """
         if 'AM' in identifiers:
             compound.gen_hd(size=size,
                             bohr_ru=bohr_ru)
             compound.gen_am(use_forces=use_forces,
                             size=size)
+        """
         if 'BOB' in identifiers:
             compound.gen_bob(size=size)
 
@@ -189,8 +191,10 @@ def do_ml(db_path='data',
         cm_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
     if 'LJM' in identifiers:
         ljm_data = np.array([comp.ljm for comp in compounds], dtype=np.float64)
+    """
     if 'AM' in identifiers:
         am_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
+    """
     if 'BOB' in identifiers:
         bob_data = np.array([comp.bob for comp in compounds], dtype=np.float64)
 
@@ -218,6 +222,7 @@ def do_ml(db_path='data',
                                         opt=opt,
                                         identifier='LJM',
                                         show_msgs=show_msgs)
+    """
     if 'AM' in identifiers:
         am_mae, am_tictoc = simple_ml(am_data,
                                       energy_pbe0,
@@ -227,6 +232,7 @@ def do_ml(db_path='data',
                                       opt=opt,
                                       identifier='AM',
                                       show_msgs=show_msgs)
+    """
     if 'BOB' in identifiers:
         bob_mae, bob_tictoc = simple_ml(bob_data,
                                         energy_pbe0,
