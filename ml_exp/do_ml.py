@@ -23,6 +23,7 @@ SOFTWARE.
 import time
 import numpy as np
 from scipy import linalg as LA
+import tensorflow as tf
 from ml_exp.misc import printc
 from ml_exp.kernels import gaussian_kernel
 from ml_exp.qm7db import qm7db
@@ -122,8 +123,8 @@ def do_ml(db_path='data',
           training_size=1500,
           test_size=None,
           sigma=1000.0,
-          opt=True,
           identifiers=['CM'],
+          use_tf=True,
           show_msgs=True):
     """
     Main function that does the whole ML process.
@@ -142,8 +143,8 @@ def do_ml(db_path='data',
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
     sigma: depth of the kernel.
-    opt: if the optimized algorithm should be used. For benchmarking purposes.
     identifiers: list of names (strings) of descriptors to use.
+    use_tf: if tensorflow should be used.
     show_msgs: if debug messages should be shown.
     """
     if type(identifiers) != list:
@@ -155,7 +156,13 @@ def do_ml(db_path='data',
     tic = time.perf_counter()
     compounds, energy_pbe0, energy_delta = qm7db(db_path=db_path,
                                                  is_shuffled=is_shuffled,
-                                                 r_seed=r_seed)
+                                                 r_seed=r_seed,
+                                                 use_tf=use_tf)
+    print('test')
+    print(type(energy_pbe0), energy_pbe0.device.endswith('GPU:0'),
+          type(energy_delta), energy_delta.device.endswith('GPU:0'))
+    print(tf.config.experimental.list_physical_devices('GPU'))
+    raise TypeError('test')
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
@@ -209,7 +216,6 @@ def do_ml(db_path='data',
                                       training_size=training_size,
                                       test_size=test_size,
                                       sigma=sigma,
-                                      opt=opt,
                                       identifier='CM',
                                       show_msgs=show_msgs)
     if 'LJM' in identifiers:
@@ -218,7 +224,6 @@ def do_ml(db_path='data',
                                         training_size=training_size,
                                         test_size=test_size,
                                         sigma=sigma,
-                                        opt=opt,
                                         identifier='LJM',
                                         show_msgs=show_msgs)
     """
@@ -228,7 +233,6 @@ def do_ml(db_path='data',
                                       training_size=training_size,
                                       test_size=test_size,
                                       sigma=sigma,
-                                      opt=opt,
                                       identifier='AM',
                                       show_msgs=show_msgs)
     """
@@ -238,7 +242,6 @@ def do_ml(db_path='data',
                                         training_size=training_size,
                                         test_size=test_size,
                                         sigma=sigma,
-                                        opt=opt,
                                         identifier='BOB',
                                         show_msgs=show_msgs)
 

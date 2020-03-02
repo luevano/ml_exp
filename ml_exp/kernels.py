@@ -20,36 +20,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import math
+# import math
 import numpy as np
 
 
 def gaussian_kernel(X1,
                     X2,
-                    sigma,
-                    opt=True):
+                    sigma):
     """
     Calculates the Gaussian Kernel.
     X1: first representations.
     X2: second representations.
     sigma: kernel width.
-    opt: if the optimized algorithm should be used. For benchmarking purposes.
     """
     i_sigma = -0.5 / (sigma*sigma)
 
     K = np.zeros((X1.shape[0], X2.shape[0]), dtype=np.float64)
-    if opt:
-        # Faster way of calculating the kernel (no numba support).
-        for i, x1 in enumerate(X1):
-            if X2.ndim == 3:
-                norm = np.linalg.norm(X2 - x1, axis=(1, 2))
-            else:
-                norm = np.linalg.norm(X2 - x1, axis=-1)
-            K[i, :] = np.exp(i_sigma * np.square(norm))
-    else:
-        for i, x1 in enumerate(X1):
-            for j, x2 in enumerate(X2):
-                f_norm = np.linalg.norm(x2 - x1)
-                K[i, j] = math.exp(i_sigma * f_norm**2)
+    # Faster way of calculating the kernel (no numba support).
+    for i, x1 in enumerate(X1):
+        if X2.ndim == 3:
+            norm = np.linalg.norm(X2 - x1, axis=(1, 2))
+        else:
+            norm = np.linalg.norm(X2 - x1, axis=-1)
+        K[i, :] = np.exp(i_sigma * np.square(norm))
+
+    # Old way of calculating the kernel (numba support).
+    """
+    for i, x1 in enumerate(X1):
+        for j, x2 in enumerate(X2):
+            f_norm = np.linalg.norm(x2 - x1)
+            K[i, j] = math.exp(i_sigma * f_norm**2)
+    """
 
     return K
