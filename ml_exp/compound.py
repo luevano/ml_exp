@@ -23,7 +23,7 @@ SOFTWARE.
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    first_neighbor_matrix, adjacency_matrix, bag_of_stuff
+    get_helping_data, adjacency_matrix, bag_of_bonds
 
 
 class Compound:
@@ -33,20 +33,31 @@ class Compound:
         Initialization of the Compound.
         xyz: (path to) the xyz file.
         """
+        # General compound data.
         self.name = None
-
         self.n = None
-        self.extra = None  # In case a comment is in the compound file.
+        self.extra = None
         self.atoms = None
-        self.atoms_nc = None
+        self.nc = None
         self.coordinates = None
         self.pbe0 = None
         self.delta = None
 
+        # Computed data.
         self.cm = None
         self.ljm = None
         self.am = None
-        self.bos = None
+        self.bob = None
+        self.bo_atoms = None
+        self.bok_cx = None
+        self.bof = None
+
+        # Helping data.
+        self.fnm = None
+        self.bonds = None
+        self.bonds_i = None
+        self.bonds_k = None
+        self.bonds_f = None
 
         if xyz is not None:
             self.read_xyz(xyz)
@@ -62,7 +73,7 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         self.cm = coulomb_matrix(self.coordinates,
-                                 self.atoms_nc,
+                                 self.nc,
                                  size=size,
                                  as_eig=as_eig,
                                  bohr_ru=bohr_ru)
@@ -84,7 +95,7 @@ class Compound:
         bohr_ru: if radius units should be in bohr's radius units.
         """
         self.ljm = lennard_jones_matrix(self.coordinates,
-                                        self.atoms_nc,
+                                        self.nc,
                                         diag_value=diag_value,
                                         sigma=sigma,
                                         epsilon=epsilon,
@@ -92,42 +103,45 @@ class Compound:
                                         as_eig=as_eig,
                                         bohr_ru=bohr_ru)
 
-    def gen_am(self,
-               use_forces=False,
+    def gen_hd(self,
                size=23,
                bohr_ru=False):
+        """
+        Generate the helping data for use in Adjacency Matrix, for example.
+        size: compund size.
+        bohr_ru: if radius units should be in bohr's radius units.
+        """
+        hd = get_helping_data(self.coordinates,
+                              self.atoms,
+                              self.nc,
+                              size=size,
+                              bohr_ru=bohr_ru)
+
+        self.fnm, self.bonds, self.bonds_i, self.bonds_k, self.bonds_f = hd
+
+    def gen_am(self,
+               use_forces=False,
+               size=23):
         """
         Generate the Adjacency Matrix for the compund.
         use_forces: if the use of forces instead of k_cx should be used.
         size: compound size.
-        bohr_ru: if radius units should be in bohr's radius units.
         """
-        # First, generate the first neighor matrix.
-        fnm, bonds, forces = first_neighbor_matrix(self.coordinates,
-                                                   self.atoms_nc,
-                                                   self.atoms,
-                                                   size=size,
-                                                   use_forces=use_forces,
-                                                   bohr_ru=bohr_ru)
-
-        # Now, generate the adjacency matrix.
-        self.am = adjacency_matrix(fnm,
-                                   bonds,
-                                   forces,
+        self.am = adjacency_matrix(self.bonds_i,
+                                   self.bonds_k,
+                                   self.bonds_f,
+                                   use_forces=use_forces,
                                    size=size)
 
-    def gen_bos(self,
-                size=23,
-                stuff='bonds'):
+    def gen_bob(self,
+                size=23):
         """
         Generate the Bag of Stuff for the compound.
         size: compound size.
-        stuff: elements of the bag, by default the known bag of bonds.
         """
-        self.bos = bag_of_stuff(self.cm,
+        self.bob = bag_of_bonds(self.cm,
                                 self.atoms,
-                                size=size,
-                                stuff=stuff)
+                                size=size)
 
     def read_xyz(self,
                  filename):
@@ -139,15 +153,15 @@ class Compound:
             lines = f.readlines()
 
         self.name = filename.split('/')[-1]
-        self.n = int(lines[0])
+        self.n = np.int32(lines[0])
         self.extra = lines[1]
         self.atoms = []
-        self.atoms_nc = np.empty(self.n, dtype=int)
-        self.coordinates = np.empty((self.n, 3), dtype=float)
+        self.nc = np.empty(self.n, dtype=np.int64)
+        self.coordinates = np.empty((self.n, 3), dtype=np.float64)
 
         for i, atom in enumerate(lines[2:self.n + 2]):
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
-            self.atoms_nc[i] = NUCLEAR_CHARGE[atom_d[0]]
-            self.coordinates[i] = np.asarray(atom_d[1:4], dtype=float)
+            self.nc[i] = NUCLEAR_CHARGE[atom_d[0]]
+            self.coordinates[i] = np.asarray(atom_d[1:4], dtype=np.float64)

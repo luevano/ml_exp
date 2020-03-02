@@ -39,7 +39,7 @@ def cholesky_solve(K,
     size = K.shape[0]
 
     # Solve Lx=y for x.
-    x = np.zeros(size, dtype=float)
+    x = np.zeros(size, dtype=np.float64)
     x[0] = y[0] / L[0, 0]
     for i in range(1, size):
         temp_sum = 0.0
@@ -49,7 +49,7 @@ def cholesky_solve(K,
 
     # Now, solve LTa=x for a.
     L2 = L.T
-    a = np.zeros(size, dtype=float)
+    a = np.zeros(size, dtype=np.float64)
     a[size - 1] = x[size - 1] / L2[size - 1, size - 1]
     for i in range(0, size - 1)[::-1]:
         temp_sum = 0.0

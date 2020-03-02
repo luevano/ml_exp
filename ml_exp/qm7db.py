@@ -42,14 +42,14 @@ def qm7db(db_path='data',
     for i, line in enumerate(lines):
         line = line.split()
         compounds.append(Compound(f'{db_path}/{line[0]}'))
-        compounds[i].pbe0 = float(line[1])
-        compounds[i].delta = float(line[1]) - float(line[2])
+        compounds[i].pbe0 = np.float64(line[1])
+        compounds[i].delta = np.float64(line[1]) - np.float64(line[2])
 
     if is_shuffled:
         random.seed(r_seed)
         random.shuffle(compounds)
 
-    e_pbe0 = np.array([compound.pbe0 for compound in compounds], dtype=float)
-    e_delta = np.array([compound.delta for compound in compounds], dtype=float)
+    e_pbe0 = np.array([comp.pbe0 for comp in compounds], dtype=np.float64)
+    e_delta = np.array([comp.delta for comp in compounds], dtype=np.float64)
 
     return compounds, e_pbe0, e_delta

@@ -53,7 +53,7 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    cm = np.zeros((size, size), dtype=float)
+    cm = np.zeros((size, size), dtype=np.float64)
 
     # Actual calculation of the coulomb matrix.
     for i, xyz_i in enumerate(coords):
@@ -120,7 +120,7 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    lj = np.zeros((size, size), dtype=float)
+    lj = np.zeros((size, size), dtype=np.float64)
 
     # Actual calculation of the lennard-jones matrix.
     for i, xyz_i in enumerate(coords):
@@ -166,26 +166,25 @@ size. Arrays are not of the right shape.')
         return lj
 
 
-def first_neighbor_matrix(coords,
-                          nc,
-                          atoms,
-                          size=23,
-                          use_forces=False,
-                          bohr_ru=False):
+def get_helping_data(coords,
+                     atoms,
+                     nc,
+                     size=23,
+                     bohr_ru=False):
     """
-    Creates the First Neighbor Matrix from the molecule data given.
+    Creates helping data such as the First Neighbor Matrix for the compound.
     coords: compound coordinates.
-    nc: nuclear charge data.
     atoms: list of atoms.
-    use_forces: if the use of forces instead of k_cx should be used.
+    nc: nuclear charge data.
+    size: compund size.
     bohr_ru: if radius units should be in bohr's radius units.
     NOTE: Bond distance of carbon to other elements
         are (for atoms present in the qm7 dataset):
-            C: 1.20 - 1.54 A (Edited to 1.19 - 1.54 A)
-            H: 1.06 - 1.12 A
-            O: 1.43 - 2.15 A
-            N: 1.47 - 2.10 A
-            S: 1.81 - 2.55 A
+            C: 1.19 - 1.54 A, 1.0
+            H: 1.06 - 1.12 A, 1.0
+            O: 1.43 - 2.15 A, 0.8
+            N: 1.47 - 2.10 A, 1.0
+            S: 1.81 - 2.55 A, 0.7
     """
     if bohr_ru:
         cr = 0.52917721067
@@ -204,88 +203,77 @@ size. Arrays are not of the right shape.')
         size = n
 
     # Possible bonds.
-    cc_bond = sorted(['C', 'C'])
-    ch_bond = sorted(['C', 'H'])
-    co_bond = sorted(['C', 'O'])
-    cn_bond = sorted(['C', 'N'])
-    cs_bond = sorted(['C', 'S'])
+    cc_bond = ''.join(sorted(['C', 'C']))
+    ch_bond = ''.join(sorted(['C', 'H']))
+    co_bond = ''.join(sorted(['C', 'O']))
+    cn_bond = ''.join(sorted(['C', 'N']))
+    cs_bond = ''.join(sorted(['C', 'S']))
+    pos_bonds = {cc_bond: (1.19, 1.54, 1.0), ch_bond: (1.06, 1.12, 1.0),
+                 co_bond: (1.43, 2.15, 0.8), cn_bond: (1.47, 2.19, 1.0),
+                 cs_bond: (1.81, 2.55, 0.7)}
 
-    fnm = np.zeros((size, size), dtype=float)
-
+    fnm = np.zeros((size, size), dtype=bool)
     bonds = []
-    forces = []
+    bonds_i = []
+    bonds_k = []
+    bonds_f = []
     for i, xyz_i in enumerate(coords):
         for j, xyz_j in enumerate(coords):
             # Ignore the diagonal.
             if i != j:
-                bond = sorted([atoms[i], atoms[j]])
-                rv = xyz_i - xyz_j
-                r = np.linalg.norm(rv)/cr
+                bond = ''.join(sorted([atoms[i], atoms[j]]))
+                if bond in pos_bonds.keys():
+                    r_min = pos_bonds[bond][0]
+                    r_max = pos_bonds[bond][1]
+                    rv = xyz_i - xyz_j
+                    r = np.linalg.norm(rv)/cr
+                    if r >= r_min and r <= r_max:
+                        fnm[i, j] = True
+                        # Only add to the list if in the upper triangle.
+                        if j > i:
+                            bonds.append(bond)
+                            bonds_i.append((i, j))
+                            bonds_k.append(pos_bonds[bond][2])
+                            bonds_f.append(rv*nc[i]*nc[j]/r**3)
 
-                # Check for each type of bond.
-                if (cc_bond == bond) and (r >= 1.19 and r <= 1.54):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (ch_bond == bond) and (r >= 1.06 and r <= 1.12):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (co_bond == bond) and (r >= 1.43 and r <= 2.15):
-                    fnm[i, j] = 0.8
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (cn_bond == bond) and (r >= 1.47 and r <= 2.10):
-                    fnm[i, j] = 1.0
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-                elif (cs_bond == bond) and (r >= 1.81 and r <= 2.55):
-                    fnm[i, j] = 0.7
-                    if j > i:
-                        bonds.append((i, j))
-                        if use_forces:
-                            forces.append(rv*nc[i]*nc[j]/r**3)
-
-    return fnm, bonds, forces
+    return fnm, bonds, bonds_i, bonds_k, bonds_f
 
 
-def adjacency_matrix(fnm,
-                     bonds,
-                     forces,
-                     size=22):
+def adjacency_matrix(bonds_i,
+                     bonds_k,
+                     bonds_f,
+                     use_forces=False,
+                     size=23):
     """
     Calculates the adjacency matrix given the bond list.
-    fnm: first neighbour matrix.
-    bonds: list of bonds (tuple of indexes).
-    forces: list of forces.
+    bonds: list of bond names.
+    bonds_i: list of bond indexes (tuple of indexes).
+    bonds_k: list of k_cx values.
+    bonds_f: list of force values.
+    use_forces: if the use of forces instead of k_cx should be used.
     size: compund size.
     """
-    n = len(bonds)
+    if bonds_i is None:
+        raise ValueError('The helping data hasn\'t been initialized for\
+the current compound.')
 
+    n = len(bonds_i)
     if size < n:
         print('Error. Compound size (n) is greater han (size). Using (n)\
               instead of (size).')
         size = n
 
-    am = np.zeros((size, size), dtype=float)
+    am = np.zeros((size, size), dtype=np.float64)
 
-    for i, bond_i in enumerate(bonds):
-        for j, bond_j in enumerate(bonds):
+    for i, bond_i in enumerate(bonds_i):
+        for j, bond_j in enumerate(bonds_i):
             # Ignore the diagonal.
             if i != j:
                 if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
-                    if forces:
-                        am[i, j] = np.dot(forces[i], forces[j])
+                    if use_forces:
+                        am[i, j] = np.dot(bonds_f[i], bonds_f[j])
                     else:
-                        am[i, j] = fnm[bond_i[0], bond_i[1]]
+                        am[i, j] = bonds_k[i]
 
     return am
 
@@ -308,10 +296,9 @@ def check_bond(bags,
     return False, None
 
 
-def bag_of_stuff(cm,
+def bag_of_bonds(cm,
                  atoms,
-                 size=23,
-                 stuff='bonds'):
+                 size=23):
     """
     Creates the Bag of Bonds using the Coulomb Matrix.
     cm: coulomb matrix.
@@ -334,7 +321,7 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
         size = n
 
     # Bond max length, calculated using only the upper triangular matrix.
-    bond_size = int((size * size - size)/2 + size)
+    bond_size = np.int32((size * size - size)/2 + size)
 
     # List where each bag data is stored.
     bags = []
@@ -366,19 +353,21 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
                 bonds.append(''.join(sorted([a_i, a_j])))
     bonds = atom_list + bonds
 
-    # Create the final vector for the bos.
-    bos = np.zeros(bond_size, dtype=float)
+    # Create the final vector for the bob.
+    bob = np.zeros(bond_size, dtype=np.float64)
     c_i = 0
     for i, bond in enumerate(bonds):
         checker = check_bond(bags, bond)
         if checker[0]:
             for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
-                # Use c_i as the index for bos if the zero padding should
+                # Use c_i as the index for bob if the zero padding should
                 # be at the end of the vector instead of between each bond.
-                bos[i*size + j] = num
+                # bob[i*size + j] = num
+                bob[c_i] = num
                 c_i += 1
         else:
             print(f'Error. Bond {bond} from bond list coudn\'t be found',
                   'in the bags list. This could be a case where the atom',
                   'is only present oncce in the molecule.')
-    return bos
+
+    return bob
