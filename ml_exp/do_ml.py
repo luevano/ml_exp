@@ -93,7 +93,7 @@ def simple_ml(descriptors,
                                                        shape=(training_size),
                                                        dtype=tf.float64))
                 K_tr += dv
-                # Y_tr = tf.expand_dims(Y_tr, 1)
+                Y_tr = tf.expand_dims(Y_tr, 1)
                 alpha = tf.linalg.cholesky_solve(tf.linalg.cholesky(K_tr),
                                                  Y_tr)
 
@@ -104,7 +104,7 @@ def simple_ml(descriptors,
                                        sigma,
                                        use_tf=use_tf)
 
-                # Y_te = tf.expand_dims(Y_te, 1)
+                Y_te = tf.expand_dims(Y_te, 1)
                 Y_pr = tf.tensordot(K_te, alpha, 1)
 
                 mae = tf.reduce_mean(tf.abs(Y_pr - Y_te))
