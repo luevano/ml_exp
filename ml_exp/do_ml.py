@@ -31,11 +31,12 @@ from ml_exp.qm7db import qm7db
 
 def simple_ml(descriptors,
               energies,
-              training_size,
+              training_size=1500,
               test_size=None,
               sigma=1000.0,
               opt=True,
               identifier=None,
+              use_tf=True,
               show_msgs=True):
     """
     Basic ML methodology for a single descriptor type.
@@ -47,6 +48,7 @@ def simple_ml(descriptors,
     sigma: depth of the kernel.
     opt: if the optimized algorithm should be used. For benchmarking purposes.
     identifier: string with the name of the descriptor used.
+    use_tf: if tensorflow should be used.
     show_msgs: if debug messages should be shown.
     NOTE: identifier is just a string and is only for identification purposes.
     Also, training is done with the first part of the data and
@@ -82,19 +84,33 @@ def simple_ml(descriptors,
     K_training = gaussian_kernel(X_training,
                                  X_training,
                                  sigma,
-                                 opt=opt)
-    alpha = LA.cho_solve(LA.cho_factor(K_training), Y_training)
+                                 use_tf=use_tf)
+    if use_tf:
+        # Y_training = tf.expand_dims(Y_training, 1)
+        alpha = tf.linalg.cholesky_solve(tf.linalg.cholesky(K_training),
+                                         Y_training)
+    else:
+        alpha = LA.cho_solve(LA.cho_factor(K_training),
+                             Y_training)
 
     X_test = descriptors[-test_size:]
     Y_test = energies[-test_size:]
     K_test = gaussian_kernel(X_test,
                              X_training,
                              sigma,
-                             opt=opt)
-    Y_predicted = np.dot(K_test,
-                         alpha)
+                             use_tf=use_tf)
+    if use_tf:
+        # Y_test = tf.expand_dims(Y_test, 1)
+        Y_predicted = tf.tensordot(K_test, alpha, 1)
+    else:
+        Y_predicted = np.dot(K_test, alpha)
 
-    mae = np.mean(np.abs(Y_predicted - Y_test))
+    print('Ducky')
+    if use_tf:
+        mae = tf.reduce_mean(tf.abs(Y_predicted - Y_test))
+    else:
+        mae = np.mean(np.abs(Y_predicted - Y_test))
+
     if show_msgs:
         printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
 
@@ -158,11 +174,6 @@ def do_ml(db_path='data',
                                                  is_shuffled=is_shuffled,
                                                  r_seed=r_seed,
                                                  use_tf=use_tf)
-    print('test')
-    print(type(energy_pbe0), energy_pbe0.device.endswith('GPU:0'),
-          type(energy_delta), energy_delta.device.endswith('GPU:0'))
-    print(tf.config.experimental.list_physical_devices('GPU'))
-    raise TypeError('test')
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
@@ -192,7 +203,7 @@ def do_ml(db_path='data',
         if 'BOB' in identifiers:
             compound.gen_bob(size=size)
 
-    # Create a numpy array for the descriptors.
+    # Create a numpy array (or tensorflow tensor) for the descriptors.
     if 'CM' in identifiers:
         cm_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
     if 'LJM' in identifiers:
@@ -203,6 +214,20 @@ def do_ml(db_path='data',
     """
     if 'BOB' in identifiers:
         bob_data = np.array([comp.bob for comp in compounds], dtype=np.float64)
+
+    if use_tf:
+        if tf.config.experimental.list_physical_devices('GPU'):
+            with tf.device('GPU:0'):
+                if 'CM' in identifiers:
+                    cm_data = tf.convert_to_tensor(cm_data)
+                if 'LJM' in identifiers:
+                    ljm_data = tf.convert_to_tensor(ljm_data)
+                # if 'AM' in identifiers:
+                #     am_data = tf.convert_to_tensor(am_data)
+                if 'BOB' in identifiers:
+                    bob_data = tf.convert_to_tensor(bob_data)
+        else:
+            raise TypeError('No GPU found, could not create Tensor objects.')
 
     toc = time.perf_counter()
     tictoc = toc - tic
@@ -217,6 +242,7 @@ def do_ml(db_path='data',
                                       test_size=test_size,
                                       sigma=sigma,
                                       identifier='CM',
+                                      use_tf=use_tf,
                                       show_msgs=show_msgs)
     if 'LJM' in identifiers:
         ljm_mae, ljm_tictoc = simple_ml(ljm_data,
@@ -225,6 +251,7 @@ def do_ml(db_path='data',
                                         test_size=test_size,
                                         sigma=sigma,
                                         identifier='LJM',
+                                        use_tf=use_tf,
                                         show_msgs=show_msgs)
     """
     if 'AM' in identifiers:
@@ -234,6 +261,7 @@ def do_ml(db_path='data',
                                       test_size=test_size,
                                       sigma=sigma,
                                       identifier='AM',
+                                      use_tf=use_tf,
                                       show_msgs=show_msgs)
     """
     if 'BOB' in identifiers:
@@ -243,6 +271,7 @@ def do_ml(db_path='data',
                                         test_size=test_size,
                                         sigma=sigma,
                                         identifier='BOB',
+                                        use_tf=use_tf,
                                         show_msgs=show_msgs)
 
     # End of program

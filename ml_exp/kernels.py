@@ -22,34 +22,64 @@ SOFTWARE.
 """
 # import math
 import numpy as np
+import tensorflow as tf
 
 
 def gaussian_kernel(X1,
                     X2,
-                    sigma):
+                    sigma,
+                    use_tf=True):
     """
     Calculates the Gaussian Kernel.
     X1: first representations.
     X2: second representations.
     sigma: kernel width.
+    use_tf: if tensorflow should be used.
     """
+    X1_size = X1.shape[0]
+    X2_size = X2.shape[0]
     i_sigma = -0.5 / (sigma*sigma)
 
-    K = np.zeros((X1.shape[0], X2.shape[0]), dtype=np.float64)
-    # Faster way of calculating the kernel (no numba support).
-    for i, x1 in enumerate(X1):
-        if X2.ndim == 3:
-            norm = np.linalg.norm(X2 - x1, axis=(1, 2))
-        else:
-            norm = np.linalg.norm(X2 - x1, axis=-1)
-        K[i, :] = np.exp(i_sigma * np.square(norm))
+    if use_tf:
+        if tf.config.experimental.list_physical_devices('GPU'):
+            with tf.device('GPU:0'):
+                X1 = tf.convert_to_tensor(X1)
+                X2 = tf.convert_to_tensor(X2)
+                X2r = tf.rank(X2)
 
-    # Old way of calculating the kernel (numba support).
-    """
-    for i, x1 in enumerate(X1):
-        for j, x2 in enumerate(X2):
-            f_norm = np.linalg.norm(x2 - x1)
-            K[i, j] = math.exp(i_sigma * f_norm**2)
-    """
+                def cond(i, _):
+                    return tf.less(i, X1_size)
+
+                def body(i, K):
+                    if X2r == 3:
+                        norm = tf.norm(X2 - X1[i], axis=(1, 2))
+                    else:
+                        norm = tf.norm(X2 - X1[i], axis=-1)
+
+                    return (i + 1,
+                            K.write(i, tf.exp(i_sigma * tf.square(norm))))
+
+                K = tf.TensorArray(dtype=tf.float64,
+                                   size=X1_size)
+                i_state = (0, K)
+                n, K = tf.while_loop(cond, body, i_state)
+                K = K.stack()
+    else:
+        K = np.zeros((X1_size, X2_size), dtype=np.float64)
+        # Faster way of calculating the kernel (no numba support).
+        for i in range(X1_size):
+            if X2.ndim == 3:
+                norm = np.linalg.norm(X2 - X1[i], axis=(1, 2))
+            else:
+                norm = np.linalg.norm(X2 - X1[i], axis=-1)
+            K[i, :] = np.exp(i_sigma * np.square(norm))
+
+        # Old way of calculating the kernel (numba support).
+        """
+        for i, x1 in enumerate(X1):
+            for j, x2 in enumerate(X2):
+                f_norm = np.linalg.norm(x2 - x1)
+                K[i, j] = math.exp(i_sigma * f_norm**2)
+        """
 
     return K
