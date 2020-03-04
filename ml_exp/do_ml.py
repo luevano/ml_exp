@@ -79,36 +79,50 @@ def simple_ml(descriptors,
         printc(f'\tTest size: {test_size}', 'CYAN')
         printc(f'\tSigma: {test_size}', 'CYAN')
 
-    X_training = descriptors[:training_size]
-    Y_training = energies[:training_size]
-    K_training = gaussian_kernel(X_training,
-                                 X_training,
-                                 sigma,
-                                 use_tf=use_tf)
     if use_tf:
+        X_training = descriptors[:training_size]
+        Y_training = energies[:training_size]
+        K_training = gaussian_kernel(X_training,
+                                     X_training,
+                                     sigma,
+                                     use_tf=use_tf)
+
         # Y_training = tf.expand_dims(Y_training, 1)
         alpha = tf.linalg.cholesky_solve(tf.linalg.cholesky(K_training),
                                          Y_training)
+
+        X_test = descriptors[-test_size:]
+        Y_test = energies[-test_size:]
+        K_test = gaussian_kernel(X_test,
+                                 X_training,
+                                 sigma,
+                                 use_tf=use_tf)
+
+        # Y_test = tf.expand_dims(Y_test, 1)
+        Y_predicted = tf.tensordot(K_test, alpha, 1)
+
+        mae = tf.reduce_mean(tf.abs(Y_predicted - Y_test))
     else:
+        X_training = descriptors[:training_size]
+        Y_training = energies[:training_size]
+        K_training = gaussian_kernel(X_training,
+                                     X_training,
+                                     sigma,
+                                     use_tf=use_tf)
+
+        # Adding a small value on the diagonal for cho_solve.
+        K_training[np.diag_indices_from(K_training)] += 1e-8
         alpha = LA.cho_solve(LA.cho_factor(K_training),
                              Y_training)
 
-    X_test = descriptors[-test_size:]
-    Y_test = energies[-test_size:]
-    K_test = gaussian_kernel(X_test,
-                             X_training,
-                             sigma,
-                             use_tf=use_tf)
-    if use_tf:
-        # Y_test = tf.expand_dims(Y_test, 1)
-        Y_predicted = tf.tensordot(K_test, alpha, 1)
-    else:
+        X_test = descriptors[-test_size:]
+        Y_test = energies[-test_size:]
+        K_test = gaussian_kernel(X_test,
+                                 X_training,
+                                 sigma,
+                                 use_tf=use_tf)
         Y_predicted = np.dot(K_test, alpha)
 
-    print('Ducky')
-    if use_tf:
-        mae = tf.reduce_mean(tf.abs(Y_predicted - Y_test))
-    else:
         mae = np.mean(np.abs(Y_predicted - Y_test))
 
     if show_msgs:

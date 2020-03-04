@@ -73,13 +73,4 @@ def gaussian_kernel(X1,
             else:
                 norm = np.linalg.norm(X2 - X1[i], axis=-1)
             K[i, :] = np.exp(i_sigma * np.square(norm))
-
-        # Old way of calculating the kernel (numba support).
-        """
-        for i, x1 in enumerate(X1):
-            for j, x2 in enumerate(X2):
-                f_norm = np.linalg.norm(x2 - x1)
-                K[i, j] = math.exp(i_sigma * f_norm**2)
-        """
-
     return K
