@@ -80,50 +80,56 @@ def simple_ml(descriptors,
         printc(f'\tSigma: {test_size}', 'CYAN')
 
     if use_tf:
-        X_training = descriptors[:training_size]
-        Y_training = energies[:training_size]
-        K_training = gaussian_kernel(X_training,
-                                     X_training,
-                                     sigma,
-                                     use_tf=use_tf)
+        if tf.config.experimental.list_physical_devices('GPU'):
+            with tf.device('GPU:0'):
+                X_tr = descriptors[:training_size]
+                Y_tr = energies[:training_size]
+                K_tr = gaussian_kernel(X_tr,
+                                       X_tr,
+                                       sigma,
+                                       use_tf=use_tf)
 
-        # Y_training = tf.expand_dims(Y_training, 1)
-        alpha = tf.linalg.cholesky_solve(tf.linalg.cholesky(K_training),
-                                         Y_training)
+                dv = tf.linalg.tensor_diag(tf.constant(1e-8,
+                                                       shape=(training_size),
+                                                       dtype=tf.float64))
+                K_tr += dv
+                # Y_tr = tf.expand_dims(Y_tr, 1)
+                alpha = tf.linalg.cholesky_solve(tf.linalg.cholesky(K_tr),
+                                                 Y_tr)
 
-        X_test = descriptors[-test_size:]
-        Y_test = energies[-test_size:]
-        K_test = gaussian_kernel(X_test,
-                                 X_training,
-                                 sigma,
-                                 use_tf=use_tf)
+                X_te = descriptors[-test_size:]
+                Y_te = energies[-test_size:]
+                K_te = gaussian_kernel(X_te,
+                                       X_tr,
+                                       sigma,
+                                       use_tf=use_tf)
 
-        # Y_test = tf.expand_dims(Y_test, 1)
-        Y_predicted = tf.tensordot(K_test, alpha, 1)
+                # Y_te = tf.expand_dims(Y_te, 1)
+                Y_pr = tf.tensordot(K_te, alpha, 1)
 
-        mae = tf.reduce_mean(tf.abs(Y_predicted - Y_test))
+                mae = tf.reduce_mean(tf.abs(Y_pr - Y_te))
     else:
-        X_training = descriptors[:training_size]
-        Y_training = energies[:training_size]
-        K_training = gaussian_kernel(X_training,
-                                     X_training,
-                                     sigma,
-                                     use_tf=use_tf)
+        X_tr = descriptors[:training_size]
+        Y_tr = energies[:training_size]
+        K_tr = gaussian_kernel(X_tr,
+                               X_tr,
+                               sigma,
+                               use_tf=use_tf)
 
         # Adding a small value on the diagonal for cho_solve.
-        K_training[np.diag_indices_from(K_training)] += 1e-8
-        alpha = LA.cho_solve(LA.cho_factor(K_training),
-                             Y_training)
+        K_tr[np.diag_indices_from(K_tr)] += 1e-8
+        alpha = LA.cho_solve(LA.cho_factor(K_tr),
+                             Y_tr)
 
-        X_test = descriptors[-test_size:]
-        Y_test = energies[-test_size:]
-        K_test = gaussian_kernel(X_test,
-                                 X_training,
-                                 sigma,
-                                 use_tf=use_tf)
-        Y_predicted = np.dot(K_test, alpha)
+        X_te = descriptors[-test_size:]
+        Y_te = energies[-test_size:]
+        K_te = gaussian_kernel(X_te,
+                               X_tr,
+                               sigma,
+                               use_tf=use_tf)
+        Y_pr = np.dot(K_te, alpha)
 
-        mae = np.mean(np.abs(Y_predicted - Y_test))
+        mae = np.mean(np.abs(Y_pr - Y_te))
 
     if show_msgs:
         printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
