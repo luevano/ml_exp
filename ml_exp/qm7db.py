@@ -22,7 +22,12 @@ SOFTWARE.
 """
 from ml_exp.compound import Compound
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+    TF_AV = True
+except ImportError:
+    print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
+    TF_AV = False
 import random
 
 
@@ -37,6 +42,10 @@ def qm7db(db_path='data',
     r_seed: random seed to use for the shuffling.
     use_tf: if tensorflow should be used.
     """
+    # If tf is to be used but couldn't be imported, don't try to use it.
+    if use_tf and not TF_AV:
+        use_tf = False
+
     fname = f'{db_path}/hof_qm7.txt'
     with open(fname, 'r') as f:
         lines = f.readlines()

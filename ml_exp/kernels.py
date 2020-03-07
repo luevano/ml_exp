@@ -22,7 +22,12 @@ SOFTWARE.
 """
 # import math
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+    TF_AV = True
+except ImportError:
+    print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
+    TF_AV = False
 
 
 def gaussian_kernel(X1,
@@ -36,6 +41,10 @@ def gaussian_kernel(X1,
     sigma: kernel width.
     use_tf: if tensorflow should be used.
     """
+    # If tf is to be used but couldn't be imported, don't try to use it.
+    if use_tf and not TF_AV:
+        use_tf = False
+
     X1_size = X1.shape[0]
     X2_size = X2.shape[0]
     i_sigma = -0.5 / (sigma*sigma)

@@ -23,7 +23,12 @@ SOFTWARE.
 import time
 import numpy as np
 from scipy import linalg as LA
-import tensorflow as tf
+try:
+    import tensorflow as tf
+    TF_AV = True
+except ImportError:
+    print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
+    TF_AV = False
 from ml_exp.misc import printc
 from ml_exp.kernels import gaussian_kernel
 from ml_exp.qm7db import qm7db
@@ -66,6 +71,10 @@ def simple_ml(descriptors,
 
     if training_size >= data_size:
         raise ValueError('Training size is greater or equal to the data size.')
+
+    # If tf is to be used but couldn't be imported, don't try to use it.
+    if use_tf and not TF_AV:
+        use_tf = False
 
     # If test_size is not set, it is set to a maximum size of 1500.
     if not test_size:
@@ -186,6 +195,10 @@ def do_ml(db_path='data',
     if type(identifiers) != list:
         raise TypeError('\'identifiers\' is not a list.')
 
+    # If tf is to be used but couldn't be imported, don't try to use it.
+    if use_tf and not TF_AV:
+        use_tf = False
+
     init_time = time.perf_counter()
 
     # Data reading.
@@ -213,13 +226,11 @@ def do_ml(db_path='data',
                              size=size,
                              as_eig=as_eig,
                              bohr_ru=bohr_ru)
-        """
         if 'AM' in identifiers:
             compound.gen_hd(size=size,
                             bohr_ru=bohr_ru)
             compound.gen_am(use_forces=use_forces,
                             size=size)
-        """
         if 'BOB' in identifiers:
             compound.gen_bob(size=size)
 
@@ -228,10 +239,8 @@ def do_ml(db_path='data',
         cm_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
     if 'LJM' in identifiers:
         ljm_data = np.array([comp.ljm for comp in compounds], dtype=np.float64)
-    """
     if 'AM' in identifiers:
         am_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
-    """
     if 'BOB' in identifiers:
         bob_data = np.array([comp.bob for comp in compounds], dtype=np.float64)
 
@@ -273,7 +282,6 @@ def do_ml(db_path='data',
                                         identifier='LJM',
                                         use_tf=use_tf,
                                         show_msgs=show_msgs)
-    """
     if 'AM' in identifiers:
         am_mae, am_tictoc = simple_ml(am_data,
                                       energy_pbe0,
@@ -283,7 +291,6 @@ def do_ml(db_path='data',
                                       identifier='AM',
                                       use_tf=use_tf,
                                       show_msgs=show_msgs)
-    """
     if 'BOB' in identifiers:
         bob_mae, bob_tictoc = simple_ml(bob_data,
                                         energy_pbe0,
