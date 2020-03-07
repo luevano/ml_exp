@@ -246,7 +246,7 @@ def do_ml(db_path='data',
     if 'LJM' in identifiers:
         ljm_data = np.array([comp.ljm for comp in compounds], dtype=np.float64)
     if 'AM' in identifiers:
-        am_data = np.array([comp.cm for comp in compounds], dtype=np.float64)
+        am_data = np.array([comp.am for comp in compounds], dtype=np.float64)
     if 'BOB' in identifiers:
         bob_data = np.array([comp.bob for comp in compounds], dtype=np.float64)
 
