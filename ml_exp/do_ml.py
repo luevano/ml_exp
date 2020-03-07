@@ -30,7 +30,7 @@ except ImportError:
     print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
     TF_AV = False
 from ml_exp.misc import printc
-from ml_exp.kernels import gaussian_kernel
+from ml_exp.kernels import gaussian_kernel, laplacian_kernel
 from ml_exp.qm7db import qm7db
 
 
@@ -93,11 +93,18 @@ def simple_ml(descriptors,
             with tf.device('GPU:0'):
                 X_tr = descriptors[:training_size]
                 Y_tr = energies[:training_size]
-                K_tr = gaussian_kernel(X_tr,
-                                       X_tr,
-                                       sigma,
-                                       use_tf=use_tf)
+                if identifier == 'BOB':
+                    K_tr = laplacian_kernel(X_tr,
+                                            X_tr,
+                                            sigma,
+                                            use_tf=use_tf)
+                else:
+                    K_tr = gaussian_kernel(X_tr,
+                                           X_tr,
+                                           sigma,
+                                           use_tf=use_tf)
 
+                # Adding a small value on the diagonal for cho_solve.
                 dv = tf.linalg.tensor_diag(tf.constant(1e-8,
                                                        shape=(training_size),
                                                        dtype=tf.float64))
@@ -108,10 +115,16 @@ def simple_ml(descriptors,
 
                 X_te = descriptors[-test_size:]
                 Y_te = energies[-test_size:]
-                K_te = gaussian_kernel(X_te,
-                                       X_tr,
-                                       sigma,
-                                       use_tf=use_tf)
+                if identifier == 'BOB':
+                    K_te = laplacian_kernel(X_te,
+                                            X_tr,
+                                            sigma,
+                                            use_tf=use_tf)
+                else:
+                    K_te = gaussian_kernel(X_te,
+                                           X_tr,
+                                           sigma,
+                                           use_tf=use_tf)
 
                 Y_te = tf.expand_dims(Y_te, 1)
                 Y_pr = tf.tensordot(K_te, alpha, 1)
@@ -120,10 +133,16 @@ def simple_ml(descriptors,
     else:
         X_tr = descriptors[:training_size]
         Y_tr = energies[:training_size]
-        K_tr = gaussian_kernel(X_tr,
-                               X_tr,
-                               sigma,
-                               use_tf=use_tf)
+        if identifier == 'BOB':
+            K_tr = laplacian_kernel(X_tr,
+                                    X_tr,
+                                    sigma,
+                                    use_tf=use_tf)
+        else:
+            K_tr = gaussian_kernel(X_tr,
+                                   X_tr,
+                                   sigma,
+                                   use_tf=use_tf)
 
         # Adding a small value on the diagonal for cho_solve.
         K_tr[np.diag_indices_from(K_tr)] += 1e-8
@@ -132,10 +151,16 @@ def simple_ml(descriptors,
 
         X_te = descriptors[-test_size:]
         Y_te = energies[-test_size:]
-        K_te = gaussian_kernel(X_te,
-                               X_tr,
-                               sigma,
-                               use_tf=use_tf)
+        if identifier == 'BOB':
+            K_te = laplacian_kernel(X_te,
+                                    X_tr,
+                                    sigma,
+                                    use_tf=use_tf)
+        else:
+            K_te = gaussian_kernel(X_te,
+                                   X_tr,
+                                   sigma,
+                                   use_tf=use_tf)
         Y_pr = np.dot(K_te, alpha)
 
         mae = np.mean(np.abs(Y_pr - Y_te))

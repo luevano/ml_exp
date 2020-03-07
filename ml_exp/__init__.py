@@ -24,6 +24,7 @@ from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
         get_helping_data, adjacency_matrix, check_bond, bag_of_bonds
 from ml_exp.qm7db import qm7db
+from ml_exp.kernels import gaussian_kernel, laplacian_kernel
 from ml_exp.do_ml import simple_ml, do_ml
 
 __all__ = ['Compound',
@@ -34,5 +35,7 @@ __all__ = ['Compound',
            'check_bond',
            'bag_of_bonds',
            'qm7db',
+           'gaussian_kernel',
+           'laplacian_kernel',
            'simple_ml',
            'do_ml']
