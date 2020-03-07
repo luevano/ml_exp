@@ -30,7 +30,7 @@ except ImportError:
     print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
     TF_AV = False
 from ml_exp.misc import printc
-from ml_exp.kernels import gaussian_kernel, laplacian_kernel
+from ml_exp.kernels import laplauss_kernel
 from ml_exp.qm7db import qm7db
 
 
@@ -41,6 +41,7 @@ def simple_ml(descriptors,
               sigma=1000.0,
               opt=True,
               identifier=None,
+              laplauss='gauss',
               use_tf=True,
               show_msgs=True):
     """
@@ -93,16 +94,11 @@ def simple_ml(descriptors,
             with tf.device('GPU:0'):
                 X_tr = descriptors[:training_size]
                 Y_tr = energies[:training_size]
-                if identifier == 'BOB':
-                    K_tr = laplacian_kernel(X_tr,
-                                            X_tr,
-                                            sigma,
-                                            use_tf=use_tf)
-                else:
-                    K_tr = gaussian_kernel(X_tr,
-                                           X_tr,
-                                           sigma,
-                                           use_tf=use_tf)
+                K_tr = laplauss_kernel(X_tr,
+                                       X_tr,
+                                       sigma,
+                                       laplauss=laplauss,
+                                       use_tf=use_tf)
 
                 # Adding a small value on the diagonal for cho_solve.
                 dv = tf.linalg.tensor_diag(tf.constant(1e-8,
@@ -115,16 +111,11 @@ def simple_ml(descriptors,
 
                 X_te = descriptors[-test_size:]
                 Y_te = energies[-test_size:]
-                if identifier == 'BOB':
-                    K_te = laplacian_kernel(X_te,
-                                            X_tr,
-                                            sigma,
-                                            use_tf=use_tf)
-                else:
-                    K_te = gaussian_kernel(X_te,
-                                           X_tr,
-                                           sigma,
-                                           use_tf=use_tf)
+                K_te = laplauss_kernel(X_te,
+                                       X_tr,
+                                       sigma,
+                                       laplauss=laplauss,
+                                       use_tf=use_tf)
 
                 Y_te = tf.expand_dims(Y_te, 1)
                 Y_pr = tf.tensordot(K_te, alpha, 1)
@@ -133,16 +124,11 @@ def simple_ml(descriptors,
     else:
         X_tr = descriptors[:training_size]
         Y_tr = energies[:training_size]
-        if identifier == 'BOB':
-            K_tr = laplacian_kernel(X_tr,
-                                    X_tr,
-                                    sigma,
-                                    use_tf=use_tf)
-        else:
-            K_tr = gaussian_kernel(X_tr,
-                                   X_tr,
-                                   sigma,
-                                   use_tf=use_tf)
+        K_tr = laplauss_kernel(X_tr,
+                               X_tr,
+                               sigma,
+                               laplauss=laplauss,
+                               use_tf=use_tf)
 
         # Adding a small value on the diagonal for cho_solve.
         K_tr[np.diag_indices_from(K_tr)] += 1e-8
@@ -151,16 +137,11 @@ def simple_ml(descriptors,
 
         X_te = descriptors[-test_size:]
         Y_te = energies[-test_size:]
-        if identifier == 'BOB':
-            K_te = laplacian_kernel(X_te,
-                                    X_tr,
-                                    sigma,
-                                    use_tf=use_tf)
-        else:
-            K_te = gaussian_kernel(X_te,
-                                   X_tr,
-                                   sigma,
-                                   use_tf=use_tf)
+        K_te = laplauss_kernel(X_te,
+                               X_tr,
+                               sigma,
+                               laplauss=laplauss,
+                               use_tf=use_tf)
         Y_pr = np.dot(K_te, alpha)
 
         mae = np.mean(np.abs(Y_pr - Y_te))
@@ -276,8 +257,8 @@ def do_ml(db_path='data',
                     cm_data = tf.convert_to_tensor(cm_data)
                 if 'LJM' in identifiers:
                     ljm_data = tf.convert_to_tensor(ljm_data)
-                # if 'AM' in identifiers:
-                #     am_data = tf.convert_to_tensor(am_data)
+                if 'AM' in identifiers:
+                    am_data = tf.convert_to_tensor(am_data)
                 if 'BOB' in identifiers:
                     bob_data = tf.convert_to_tensor(bob_data)
         else:
@@ -296,6 +277,7 @@ def do_ml(db_path='data',
                                       test_size=test_size,
                                       sigma=sigma,
                                       identifier='CM',
+                                      laplauss='gauss',
                                       use_tf=use_tf,
                                       show_msgs=show_msgs)
     if 'LJM' in identifiers:
@@ -305,6 +287,7 @@ def do_ml(db_path='data',
                                         test_size=test_size,
                                         sigma=sigma,
                                         identifier='LJM',
+                                        laplauss='gauss',
                                         use_tf=use_tf,
                                         show_msgs=show_msgs)
     if 'AM' in identifiers:
@@ -314,6 +297,7 @@ def do_ml(db_path='data',
                                       test_size=test_size,
                                       sigma=sigma,
                                       identifier='AM',
+                                      laplauss='gauss',
                                       use_tf=use_tf,
                                       show_msgs=show_msgs)
     if 'BOB' in identifiers:
@@ -323,6 +307,7 @@ def do_ml(db_path='data',
                                         test_size=test_size,
                                         sigma=sigma,
                                         identifier='BOB',
+                                        laplauss='laplace',
                                         use_tf=use_tf,
                                         show_msgs=show_msgs)
 
