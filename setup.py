@@ -31,15 +31,15 @@ import os
 
 from setuptools import find_packages, setup
 
-from lj_matrix.version import __version__
+from ml_exp.version import __version__
 
 # Package meta-data.
-NAME = 'lj_matrix'
-DESCRIPTION = 'A Lennard Jones matrix exploration.'
+NAME = 'ml_exp'
+DESCRIPTION = 'A ML exploration.'
 URL = 'https://github.com/luevano/lj_matrix'
 EMAIL = 'a301436@uach.mx'
 AUTHOR = 'David Luevano Alvarado'
-REQUIRES_PYTHON = '>=3.7'
+REQUIRES_PYTHON = '>=3.8'
 VERSION = __version__
 # VERSION = '0.0.1'
 
@@ -97,6 +97,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.8'
     ]
 )
