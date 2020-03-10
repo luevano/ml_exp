@@ -28,20 +28,31 @@ from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
 
 class Compound:
     def __init__(self,
-                 xyz=None):
+                 xyz=None,
+                 db='qm7'):
         """
         Initialization of the Compound.
         xyz: (path to) the xyz file.
+        db: which db is the xyz file based on.
         """
-        # General compound data.
+        # xyz and nc data.
         self.name = None
         self.n = None
-        self.extra = None
+        self.comment = None
+        self.coordinates = None
         self.atoms = None
         self.nc = None
-        self.coordinates = None
-        self.pbe0 = None
-        self.delta = None
+
+        # qm7 data.
+        self.qm7pbe0 = None
+        self.qm7delta = None
+
+        # qm9 data.
+        self.qm9prop = None
+        self.qm9Mulliken = None
+        self.qm9frec = None
+        self.qm9SMILES = None
+        self.qm9InChI = None
 
         # Computed data.
         self.cm = None
@@ -61,7 +72,7 @@ class Compound:
         self.bonds_f = None
 
         if xyz is not None:
-            self.read_xyz(xyz)
+            self.read_xyz(xyz, db=db)
 
     def gen_cm(self,
                size=23,
@@ -155,17 +166,19 @@ class Compound:
                                 size=size)
 
     def read_xyz(self,
-                 filename):
+                 filename,
+                 db='qm7'):
         """
         Reads an xyz file and adds the corresponding data to the Compound.
         filename: (path to) the xyz file.
+        db: which db is the xyz file based on.
         """
         with open(filename, 'r') as f:
             lines = f.readlines()
 
         self.name = filename.split('/')[-1]
         self.n = np.int32(lines[0])
-        self.extra = lines[1]
+        self.comment = lines[1]
         self.atoms = []
         self.nc = np.empty(self.n, dtype=np.int64)
         self.coordinates = np.empty((self.n, 3), dtype=np.float64)
