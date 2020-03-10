@@ -239,19 +239,19 @@ the current compound.')
               instead of (size).')
         size = n
 
-    am = np.zeros((size, size), dtype=np.float64)
+    am = np.zeros((n, n), dtype=np.float64)
 
-    for i, bond_i in enumerate(bonds_i):
-        for j, bond_j in enumerate(bonds_i):
-            # Ignore the diagonal.
-            if i != j:
-                if (bond_i[0] in bond_j) or (bond_i[1] in bond_j):
-                    if use_forces:
-                        am[i, j] = np.dot(bonds_f[i], bonds_f[j])
-                    else:
-                        am[i, j] = bonds_k[i]
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            if (bonds_i[i][0] in bonds_i[j]) or (bonds_i[i][1] in bonds_i[j]):
+                if use_forces:
+                    am[i, j] = np.dot(bonds_f[i], bonds_f[j])
+                    am[j, i] = am[i, j]
+                else:
+                    am[i, j] = bonds_k[i]
+                    am[j, i] = am[i, j]
 
-    return am
+    return np.pad(am, ((0, size - n), (0, size - n)), 'constant')
 
 
 def check_bond(bags,
