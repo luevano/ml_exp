@@ -112,50 +112,35 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    lj = np.zeros((size, size), dtype=np.float64)
+    lj = np.zeros((n, n), dtype=np.float64)
 
     # Actual calculation of the lennard-jones matrix.
-    for i, xyz_i in enumerate(coords):
-        for j, xyz_j in enumerate(coords):
-            if i == j:
-                if diag_value is None:
-                    lj[i, j] = (0.5*nc[i]**2.4)
-                else:
-                    lj[i, j] = diag_value
-            else:
-                # Calculations are done after i==j is checked
-                # so no division by zero is done.
+    for i in range(n):
+        if diag_value is None:
+            lj[i, i] = 0.5*nc[i]**2.4
+        else:
+            lj[i, i] = diag_value
 
-                # A little play with r exponents
-                # so no square root is calculated.
-                # Conversion factor is included in r^2.
-                rv = xyz_i - xyz_j
-                r = np.linalg.norm(rv)/cr
+    # Calculates the values row-wise for faster timings.
+    # Don't calculate the last element (it's only the diagonal element).
+    for i in range(n - 1):
+        rv = coords[i + 1:] - coords[i]
+        r = (sigma*cr)/np.linalg.norm(rv, axis=1)
 
-                # 1/r^n
-                r_2 = sigma**2/r**2
-                r_6 = r_2**3
-                r_12 = r_6**2
-                lj[i, j] = (4*epsilon*(r_12 - r_6))
+        # 1/r^n
+        r_6 = r**6
+        r_12 = r**12
+        val = (4*epsilon*(r_12 - r_6))
+        lj[i, i + 1:] = val
+        lj[i + 1:, i] = val
 
     # Now the value will be returned.
     if as_eig:
-        lj_sorted = np.sort(np.linalg.eig(lj)[0])[::-1]
-        # Thanks to SO for the following lines of code.
-        # https://stackoverflow.com/a/43011036
+        lj_eigs = np.sort(np.linalg.eig(lj)[0])[::-1]
 
-        # Keep zeros at the end.
-        mask = lj_sorted != 0.
-        f_mask = mask.sum(0, keepdims=1) >\
-            np.arange(lj_sorted.shape[0]-1, -1, -1)
-
-        f_mask = f_mask[::-1]
-        lj_sorted[f_mask] = lj_sorted[mask]
-        lj_sorted[~f_mask] = 0.
-
-        return lj_sorted
+        return np.pad(lj_eigs, (0, size - n), 'constant')
     else:
-        return lj
+        return np.pad(lj, ((0, size - n), (0, size - n)), 'constant')
 
 
 def get_helping_data(coords,
