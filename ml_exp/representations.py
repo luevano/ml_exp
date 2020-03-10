@@ -60,7 +60,8 @@ size. Arrays are not of the right shape.')
         cm[i, i] = 0.5*nc[i]**2.4
 
     # Calculates the values row-wise for faster timings.
-    for i in range(n):
+    # Don't calculate the last element (it's only the diagonal element).
+    for i in range(n - 1):
         rv = coords[i + 1:] - coords[i]
         r = np.linalg.norm(rv, axis=1)/cr
         val = nc[i]*nc[i +1:]/r
