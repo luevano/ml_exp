@@ -139,3 +139,24 @@ NUCLEAR_CHARGE = {
     'Lv': 116,
     'Ts': 117,
     'Og': 118}
+
+"""
+NOTE: Bond distance of carbon to other elements
+    are (for atoms present in the qm7 dataset):
+        C: 1.19 - 1.54 A, 1.0
+        H: 1.06 - 1.12 A, 1.0
+        O: 1.43 - 2.15 A, 0.8
+        N: 1.47 - 2.10 A, 1.0
+        S: 1.81 - 2.55 A, 0.7
+"""
+cc_bond = ''.join(sorted(['C', 'C']))
+ch_bond = ''.join(sorted(['C', 'H']))
+co_bond = ''.join(sorted(['C', 'O']))
+cn_bond = ''.join(sorted(['C', 'N']))
+cs_bond = ''.join(sorted(['C', 'S']))
+
+POSSIBLE_BONDS = {cc_bond: (1.19, 1.54, 1.0),
+                  ch_bond: (1.06, 1.12, 1.0),
+                  co_bond: (1.43, 2.15, 0.8),
+                  cn_bond: (1.47, 2.19, 1.0),
+                  cs_bond: (1.81, 2.55, 0.7)}

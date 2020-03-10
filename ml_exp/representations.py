@@ -22,6 +22,7 @@ SOFTWARE.
 """
 import numpy as np
 from collections import Counter
+from ml_exp.data import POSSIBLE_BONDS
 
 
 def coulomb_matrix(coords,
@@ -155,13 +156,6 @@ def get_helping_data(coords,
     nc: nuclear charge data.
     size: compund size.
     bohr_ru: if radius units should be in bohr's radius units.
-    NOTE: Bond distance of carbon to other elements
-        are (for atoms present in the qm7 dataset):
-            C: 1.19 - 1.54 A, 1.0
-            H: 1.06 - 1.12 A, 1.0
-            O: 1.43 - 2.15 A, 0.8
-            N: 1.47 - 2.10 A, 1.0
-            S: 1.81 - 2.55 A, 0.7
     """
     if bohr_ru:
         cr = 0.52917721067
@@ -179,16 +173,6 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    # Possible bonds.
-    cc_bond = ''.join(sorted(['C', 'C']))
-    ch_bond = ''.join(sorted(['C', 'H']))
-    co_bond = ''.join(sorted(['C', 'O']))
-    cn_bond = ''.join(sorted(['C', 'N']))
-    cs_bond = ''.join(sorted(['C', 'S']))
-    pos_bonds = {cc_bond: (1.19, 1.54, 1.0), ch_bond: (1.06, 1.12, 1.0),
-                 co_bond: (1.43, 2.15, 0.8), cn_bond: (1.47, 2.19, 1.0),
-                 cs_bond: (1.81, 2.55, 0.7)}
-
     fnm = np.zeros((n, n), dtype=bool)
     bonds = []
     bonds_i = []
@@ -197,9 +181,9 @@ size. Arrays are not of the right shape.')
     for i in range(n - 1):
         for j in range(i + 1, n):
             bond = ''.join(sorted([atoms[i], atoms[j]]))
-            if bond in pos_bonds.keys():
-                r_min = pos_bonds[bond][0]
-                r_max = pos_bonds[bond][1]
+            if bond in POSSIBLE_BONDS.keys():
+                r_min = POSSIBLE_BONDS[bond][0]
+                r_max = POSSIBLE_BONDS[bond][1]
                 rv = coords[i] - coords[j]
                 r = np.linalg.norm(rv)/cr
                 if r >= r_min and r <= r_max:
@@ -207,7 +191,7 @@ size. Arrays are not of the right shape.')
                     fnm[j, i] = True
                     bonds.append(bond)
                     bonds_i.append((i, j))
-                    bonds_k.append(pos_bonds[bond][2])
+                    bonds_k.append(POSSIBLE_BONDS[bond][2])
                     bonds_f.append(rv*nc[i]*nc[j]/r**3)
 
     fnm = np.pad(fnm, ((0, size - n), (0, size - n)), 'constant')

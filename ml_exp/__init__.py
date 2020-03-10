@@ -22,8 +22,9 @@ SOFTWARE.
 """
 from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-        get_helping_data, adjacency_matrix, check_bond, bag_of_bonds
+        get_helping_data, adjacency_matrix, epsilon_index, check_bond, bag_of_bonds
 from ml_exp.qm7db import qm7db
+from ml_exp.data import NUCLEAR_CHARGE, POSSIBLE_BONDS
 from ml_exp.kernels import laplauss_kernel
 from ml_exp.do_ml import simple_ml, do_ml
 
@@ -32,9 +33,12 @@ __all__ = ['Compound',
            'lennard_jones_matrix',
            'get_helping_data',
            'adjacency_matrix',
+           'epsilon_index',
            'check_bond',
            'bag_of_bonds',
            'qm7db',
            'laplauss_kernel',
            'simple_ml',
-           'do_ml']
+           'do_ml',
+           'NUCLEAR_CHARGE',
+           'POSSIBLE_BONDS']
