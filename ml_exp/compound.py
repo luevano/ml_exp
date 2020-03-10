@@ -197,6 +197,8 @@ class Compound:
             self.qm9Mulliken = np.empty(self.n, dtype=np.float64)
 
         for i, atom in enumerate(lines[2:self.n + 2]):
+            if db == 'qm9':
+                atom = atom.replace('*^', 'e')
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
