@@ -35,6 +35,8 @@ class Compound:
         xyz: (path to) the xyz file.
         db: which db is the xyz file based on.
         """
+        self.dbtype = None
+
         # xyz and nc data.
         self.name = None
         self.n = None
@@ -176,6 +178,8 @@ class Compound:
         with open(filename, 'r') as f:
             lines = f.readlines()
 
+        self.dbtype = db
+
         self.name = filename.split('/')[-1]
         self.n = np.int32(lines[0])
         self.comment = lines[1]
@@ -183,9 +187,20 @@ class Compound:
         self.nc = np.empty(self.n, dtype=np.int64)
         self.coordinates = np.empty((self.n, 3), dtype=np.float64)
 
+        if db == 'qm9':
+            self.qm9prop = np.asarray(self.comment.split()[2:],
+                                      dtype=np.float64)
+            self.qm9frec = np.asarray(lines[self.n + 2].split(),
+                                      dtype=np.float64)
+            self.qm9SMILES = lines[self.n + 3].split()
+            self.qm9InChI = lines[self.n + 4].split()
+            self.qm9Mulliken = np.empty(self.n, dtype=np.float64)
+
         for i, atom in enumerate(lines[2:self.n + 2]):
             atom_d = atom.split()
 
             self.atoms.append(atom_d[0])
             self.nc[i] = NUCLEAR_CHARGE[atom_d[0]]
             self.coordinates[i] = np.asarray(atom_d[1:4], dtype=np.float64)
+            if db == 'qm9':
+                self.qm9Mulliken[i] = atom_d[4]
