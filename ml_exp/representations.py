@@ -254,6 +254,40 @@ the current compound.')
     return np.pad(am, ((0, size - n), (0, size - n)), 'constant')
 
 
+def epsilon_index(am,
+                  bonds_i,
+                  size=23):
+    """
+    Calculates the Epsilon index of G, presented by Estrada.
+    am: adjacency matrix.
+    bonds_i: list of bond indexes (tuple of indexes).
+    size: compund size.
+    """
+    if am is None:
+        raise ValueError('The adjacency matrix hasn\'t been initialized for\
+the current compound.')
+
+    n = len(bonds_i)
+    if size < n:
+        print('Error. Compound size (n) is greater han (size). Using (n)\
+              instead of (size).')
+        size = n
+
+    deltas = np.zeros(n, dtype=np.float64)
+
+    for i in range(n):
+        deltas[i] = np.sum(am[i, :])
+
+    ei = 0.0
+    for i in range(n - 1):
+        for j in range(i +1, n):
+            if (bonds_i[i][0] in bonds_i[j]) or (bonds_i[i][0] in bonds_i[j]):
+                val = deltas[i]*deltas[j]
+                ei += 1.0/val**0.5
+
+    return ei
+
+
 def check_bond(bags,
                bond):
     """

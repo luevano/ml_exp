@@ -23,7 +23,7 @@ SOFTWARE.
 import numpy as np
 from ml_exp.data import NUCLEAR_CHARGE
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
-    get_helping_data, adjacency_matrix, bag_of_bonds
+    get_helping_data, adjacency_matrix, epsilon_index, bag_of_bonds
 
 
 class Compound:
@@ -47,6 +47,7 @@ class Compound:
         self.cm = None
         self.ljm = None
         self.am = None
+        self.ei = None
         self.bob = None
         self.bo_atoms = None
         self.bok_cx = None
@@ -133,10 +134,20 @@ class Compound:
                                    use_forces=use_forces,
                                    size=size)
 
+    def gen_ei(self,
+               size=23):
+        """
+        Generates the Epsilon Index for the compound.
+        size: compound size.
+        """
+        self.ei = epsilon_index(self.am,
+                                bonds_i,
+                                size=size)
+
     def gen_bob(self,
                 size=23):
         """
-        Generate the Bag of Stuff for the compound.
+        Generate the Bag of Bonds for the compound.
         size: compound size.
         """
         self.bob = bag_of_bonds(self.cm,
