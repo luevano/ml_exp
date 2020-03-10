@@ -189,29 +189,28 @@ size. Arrays are not of the right shape.')
                  co_bond: (1.43, 2.15, 0.8), cn_bond: (1.47, 2.19, 1.0),
                  cs_bond: (1.81, 2.55, 0.7)}
 
-    fnm = np.zeros((size, size), dtype=bool)
+    fnm = np.zeros((n, n), dtype=bool)
     bonds = []
     bonds_i = []
     bonds_k = []
     bonds_f = []
-    for i, xyz_i in enumerate(coords):
-        for j, xyz_j in enumerate(coords):
-            # Ignore the diagonal.
-            if i != j:
-                bond = ''.join(sorted([atoms[i], atoms[j]]))
-                if bond in pos_bonds.keys():
-                    r_min = pos_bonds[bond][0]
-                    r_max = pos_bonds[bond][1]
-                    rv = xyz_i - xyz_j
-                    r = np.linalg.norm(rv)/cr
-                    if r >= r_min and r <= r_max:
-                        fnm[i, j] = True
-                        # Only add to the list if in the upper triangle.
-                        if j > i:
-                            bonds.append(bond)
-                            bonds_i.append((i, j))
-                            bonds_k.append(pos_bonds[bond][2])
-                            bonds_f.append(rv*nc[i]*nc[j]/r**3)
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            bond = ''.join(sorted([atoms[i], atoms[j]]))
+            if bond in pos_bonds.keys():
+                r_min = pos_bonds[bond][0]
+                r_max = pos_bonds[bond][1]
+                rv = coords[i] - coords[j]
+                r = np.linalg.norm(rv)/cr
+                if r >= r_min and r <= r_max:
+                    fnm[i, j] = True
+                    fnm[j, i] = True
+                    bonds.append(bond)
+                    bonds_i.append((i, j))
+                    bonds_k.append(pos_bonds[bond][2])
+                    bonds_f.append(rv*nc[i]*nc[j]/r**3)
+
+    fnm = np.pad(fnm, ((0, size - n), (0, size - n)), 'constant')
 
     return fnm, bonds, bonds_i, bonds_k, bonds_f
 
