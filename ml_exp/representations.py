@@ -57,14 +57,15 @@ size. Arrays are not of the right shape.')
 
     # Actual calculation of the coulomb matrix.
     for i in range(n):
-        for j in range(i, n):
-            if i==j:
-                cm[i, i] = 0.5*nc[i]**2.4
-            else:
-                rv = coords[i] - coords[j]
-                r = np.linalg.norm(rv)/cr
-                cm[i, j] = nc[i]*nc[j]/r
-                cm[j, i] = cm[i, j]
+        cm[i, i] = 0.5*nc[i]**2.4
+
+    # Calculates the values row-wise for faster timings.
+    for i in range(n):
+        rv = coords[i + 1:] - coords[i]
+        r = np.linalg.norm(rv, axis=1)/cr
+        val = nc[i]*nc[i +1:]/r
+        cm[i, i + 1:n] = val
+        cm[i + 1:n, i] = val
 
     # Now the value will be returned.
     if as_eig:
