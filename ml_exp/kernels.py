@@ -50,7 +50,7 @@ def laplauss_kernel(X1,
     X1_size = X1.shape[0]
     X2_size = X2.shape[0]
     if laplauss == 'gauss':
-        i_sigma = -0.5 / (sigma*sigma)
+        i_sigma = -0.5 / (sigma**2)
     elif laplauss == 'laplace':
         i_sigma = -0.5 / sigma
     else:
