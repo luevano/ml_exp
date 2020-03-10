@@ -53,7 +53,7 @@ size. Arrays are not of the right shape.')
               'instead of (size).')
         size = n
 
-    cm = np.zeros((size, size), dtype=np.float64)
+    cm = np.zeros((n, n), dtype=np.float64)
 
     # Actual calculation of the coulomb matrix.
     for i in range(n):
@@ -65,27 +65,16 @@ size. Arrays are not of the right shape.')
         rv = coords[i + 1:] - coords[i]
         r = np.linalg.norm(rv, axis=1)/cr
         val = nc[i]*nc[i +1:]/r
-        cm[i, i + 1:n] = val
-        cm[i + 1:n, i] = val
+        cm[i, i + 1:] = val
+        cm[i + 1:, i] = val
 
     # Now the value will be returned.
     if as_eig:
-        cm_sorted = np.sort(np.linalg.eig(cm)[0])[::-1]
-        # Thanks to SO for the following lines of code.
-        # https://stackoverflow.com/a/43011036
+        cm_eigs = np.sort(np.linalg.eig(cm)[0])[::-1]
 
-        # Keep zeros at the end.
-        mask = cm_sorted != 0.
-        f_mask = mask.sum(0, keepdims=1) >\
-            np.arange(cm_sorted.shape[0]-1, -1, -1)
-
-        f_mask = f_mask[::-1]
-        cm_sorted[f_mask] = cm_sorted[mask]
-        cm_sorted[~f_mask] = 0.
-
-        return cm_sorted
+        return np.pad(cm_eigs, (0, size - n), 'constant')
     else:
-        return cm
+        return np.pad(cm, ((0, size - n), (0, size - n)), 'constant')
 
 
 def lennard_jones_matrix(coords,
