@@ -31,7 +31,7 @@ except ImportError:
     TF_AV = False
 from ml_exp.misc import printc
 from ml_exp.kernels import laplauss_kernel
-from ml_exp.qm7db import qm7db
+from ml_exp.readdb import qm7db
 
 
 def krr(descriptors,

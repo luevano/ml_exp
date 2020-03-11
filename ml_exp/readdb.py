@@ -74,3 +74,34 @@ def qm7db(db_path='data',
             raise TypeError('No GPU found, could not create Tensor objects.')
 
     return compounds, e_pbe0, e_delta
+
+
+def qm9db(db_path='data',
+          is_shuffled=True,
+          r_seed=111,
+          use_tf=True):
+    """
+    Creates a list of compounds with the qm9 database.
+    db_path: path to the database directory.
+    is_shuffled: if the resulting list of compounds should be shuffled.
+    r_seed: random seed to use for the shuffling.
+    use_tf: if tensorflow should be used.
+    """
+    # If tf is to be used but couldn't be imported, don't try to use it.
+    if use_tf and not TF_AV:
+        use_tf = False
+
+    fname = f'{db_path}/xyz_qm9.txt'
+    with open(fname, 'r') as f:
+        lines = f.readlines()
+
+    compounds = []
+    for i, line in enumerate(lines):
+        line = line.strip()
+        compounds.append(Compound(f'{db_path}/{line}', db='qm9'))
+
+    if is_shuffled:
+        random.seed(r_seed)
+        random.shuffle(compounds)
+
+    return compounds

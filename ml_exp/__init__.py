@@ -23,7 +23,7 @@ SOFTWARE.
 from ml_exp.compound import Compound
 from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
         get_helping_data, adjacency_matrix, epsilon_index, check_bond, bag_of_bonds
-from ml_exp.qm7db import qm7db
+from ml_exp.readdb import qm7db, qm9db
 from ml_exp.data import NUCLEAR_CHARGE, POSSIBLE_BONDS
 from ml_exp.kernels import laplauss_kernel
 from ml_exp.krr import krr, multi_krr
@@ -37,6 +37,7 @@ __all__ = ['Compound',
            'check_bond',
            'bag_of_bonds',
            'qm7db',
+           'qm9db',
            'laplauss_kernel',
            'krr',
            'multi_krr',
