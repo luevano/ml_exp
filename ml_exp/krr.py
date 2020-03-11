@@ -155,9 +155,6 @@ def krr(descriptors,
     tictoc = toc - tic
     if show_msgs:
         printc(f'\t{identifier} ML took {tictoc:.4f} seconds.', 'GREEN')
-        printc(f'\t\tTraining size: {training_size}', 'CYAN')
-        printc(f'\t\tTest size: {test_size}', 'CYAN')
-        printc(f'\t\tSigma: {sigma}', 'CYAN')
 
     return mae, tictoc
 
