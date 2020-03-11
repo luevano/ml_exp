@@ -34,18 +34,18 @@ from ml_exp.kernels import laplauss_kernel
 from ml_exp.qm7db import qm7db
 
 
-def simple_ml(descriptors,
-              energies,
-              training_size=1500,
-              test_size=None,
-              sigma=1000.0,
-              opt=True,
-              identifier=None,
-              laplauss='gauss',
-              use_tf=True,
+def krr(descriptors,
+        energies,
+        training_size=1500,
+        test_size=None,
+        sigma=1000.0,
+        opt=True,
+        identifier=None,
+        laplauss='gauss',
+        use_tf=True,
               show_msgs=True):
     """
-    Basic ML methodology for a single descriptor type.
+    Basic krr methodology for a single descriptor type.
     descriptors: array of descriptors.
     energies: array of energies.
     training_size: size of the training set to use.
@@ -162,23 +162,23 @@ def simple_ml(descriptors,
     return mae, tictoc
 
 
-def do_ml(db_path='data',
-          is_shuffled=True,
-          r_seed=111,
-          diag_value=None,
-          lj_sigma=1.0,
-          lj_epsilon=1.0,
-          use_forces=False,
-          stuff='bonds',
-          size=23,
-          as_eig=True,
-          bohr_ru=False,
-          training_size=1500,
-          test_size=None,
-          sigma=1000.0,
-          identifiers=['CM'],
-          use_tf=True,
-          show_msgs=True):
+def multi_krr(db_path='data',
+              is_shuffled=True,
+              r_seed=111,
+              diag_value=None,
+              lj_sigma=1.0,
+              lj_epsilon=1.0,
+              use_forces=False,
+              stuff='bonds',
+              size=23,
+              as_eig=True,
+              bohr_ru=False,
+              training_size=1500,
+              test_size=None,
+              sigma=1000.0,
+              identifiers=['CM'],
+              use_tf=True,
+              show_msgs=True):
     """
     Main function that does the whole ML process.
     db_path: path to the database directory.
