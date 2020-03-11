@@ -121,6 +121,8 @@ def simple_ml(descriptors,
                 Y_pr = tf.tensordot(K_te, alpha, 1)
 
                 mae = tf.reduce_mean(tf.abs(Y_pr - Y_te))
+        else:
+            raise TypeError('No GPU found, could not create Tensor objects.')
     else:
         X_tr = descriptors[:training_size]
         Y_tr = energies[:training_size]

@@ -87,6 +87,8 @@ def laplauss_kernel(X1,
                 i_state = (0, K)
                 n, K = tf.while_loop(cond, body, i_state)
                 K = K.stack()
+        else:
+            raise TypeError('No GPU found, could not create Tensor objects.')
     else:
         K = np.zeros((X1_size, X2_size), dtype=np.float64)
         # Faster way of calculating the kernel (no numba support).
