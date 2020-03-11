@@ -178,7 +178,7 @@ def multi_krr(db_path='data',
               use_tf=True,
               show_msgs=True):
     """
-    Main function that does the whole ML process.
+    Does multiple KRR for several descriptors.
     db_path: path to the database directory.
     is_shuffled: if the resulting list of compounds should be shuffled.
     r_seed: random seed to use for the shuffling.
