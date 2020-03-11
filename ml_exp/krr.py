@@ -43,7 +43,7 @@ def krr(descriptors,
         identifier=None,
         laplauss='gauss',
         use_tf=True,
-              show_msgs=True):
+        show_msgs=True):
     """
     Basic krr methodology for a single descriptor type.
     descriptors: array of descriptors.
