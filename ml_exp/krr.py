@@ -68,7 +68,7 @@ def krr(descriptors,
         identifier = 'NOT SPECIFIED'
 
     if not data_size == labels.shape[0]:
-        raise ValueError('Energies size is different than descriptors size.')
+        raise ValueError('Labels size is different than descriptors size.')
 
     if training_size >= data_size:
         raise ValueError('Training size is greater or equal to the data size.')
@@ -78,6 +78,7 @@ def krr(descriptors,
         use_tf = False
 
     # If test_size is not set, it is set to a maximum size of 1500.
+    # Also, no overlapping with training data is achieved.
     if not test_size:
         test_size = data_size - training_size
         if test_size > 1500:
@@ -88,6 +89,8 @@ def krr(descriptors,
         printc(f'\tTraining size: {training_size}', 'CYAN')
         printc(f'\tTest size: {test_size}', 'CYAN')
         printc(f'\tSigma: {test_size}', 'CYAN')
+        printc(f'\tKernel: {laplauss}', 'CYAN')
+        printc(f'\tUse tf: {use_tf}', 'CYAN')
 
     if use_tf:
         if tf.config.experimental.list_physical_devices('GPU'):
@@ -148,12 +151,10 @@ def krr(descriptors,
 
         mae = np.mean(np.abs(Y_pr - Y_te))
 
-    if show_msgs:
-        printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
-
     toc = time.perf_counter()
     tictoc = toc - tic
     if show_msgs:
+        printc(f'\tMAE for {identifier}: {mae:.4f}', 'GREEN')
         printc(f'\t{identifier} ML took {tictoc:.4f} seconds.', 'GREEN')
 
     return mae, tictoc
