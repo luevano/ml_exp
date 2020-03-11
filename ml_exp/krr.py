@@ -35,7 +35,7 @@ from ml_exp.readdb import qm7db
 
 
 def krr(descriptors,
-        energies,
+        labels,
         training_size=1500,
         test_size=None,
         sigma=1000.0,
@@ -47,7 +47,7 @@ def krr(descriptors,
     """
     Basic krr methodology for a single descriptor type.
     descriptors: array of descriptors.
-    energies: array of energies.
+    labels: array of labels.
     training_size: size of the training set to use.
     test_size: size of the test set to use. If no size is given,
         the last remaining molecules are used.
@@ -67,7 +67,7 @@ def krr(descriptors,
     if not identifier:
         identifier = 'NOT SPECIFIED'
 
-    if not data_size == energies.shape[0]:
+    if not data_size == labels.shape[0]:
         raise ValueError('Energies size is different than descriptors size.')
 
     if training_size >= data_size:
@@ -93,7 +93,7 @@ def krr(descriptors,
         if tf.config.experimental.list_physical_devices('GPU'):
             with tf.device('GPU:0'):
                 X_tr = descriptors[:training_size]
-                Y_tr = energies[:training_size]
+                Y_tr = labels[:training_size]
                 K_tr = laplauss_kernel(X_tr,
                                        X_tr,
                                        sigma,
@@ -110,7 +110,7 @@ def krr(descriptors,
                                                  Y_tr)
 
                 X_te = descriptors[-test_size:]
-                Y_te = energies[-test_size:]
+                Y_te = labels[-test_size:]
                 K_te = laplauss_kernel(X_te,
                                        X_tr,
                                        sigma,
@@ -125,7 +125,7 @@ def krr(descriptors,
             raise TypeError('No GPU found, could not create Tensor objects.')
     else:
         X_tr = descriptors[:training_size]
-        Y_tr = energies[:training_size]
+        Y_tr = labels[:training_size]
         K_tr = laplauss_kernel(X_tr,
                                X_tr,
                                sigma,
@@ -138,7 +138,7 @@ def krr(descriptors,
                              Y_tr)
 
         X_te = descriptors[-test_size:]
-        Y_te = energies[-test_size:]
+        Y_te = labels[-test_size:]
         K_te = laplauss_kernel(X_te,
                                X_tr,
                                sigma,
