@@ -97,9 +97,9 @@ def laplauss_kernel(X1,
                 norm = np.linalg.norm(X2 - X1[i], axis=(1, 2))
             else:
                 norm = np.linalg.norm(X2 - X1[i], axis=-1)
-            if laplauuss == 'gauss':
+            if laplauss == 'gauss':
                 K[i, :] = np.exp(i_sigma * np.square(norm))
-            elif laplauce == 'laplace':
+            elif laplauss == 'laplace':
                 K[i, :] = np.exp(i_sigma * norm)
             else:
                 K[i, :] = np.exp(i_sigma * np.square(norm))
