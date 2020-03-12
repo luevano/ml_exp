@@ -88,7 +88,7 @@ def krr(descriptors,
         printc(f'{identifier} ML started.', 'GREEN')
         printc(f'\tTraining size: {training_size}', 'CYAN')
         printc(f'\tTest size: {test_size}', 'CYAN')
-        printc(f'\tSigma: {test_size}', 'CYAN')
+        printc(f'\tSigma: {sigma}', 'CYAN')
         printc(f'\tKernel: {laplauss}', 'CYAN')
         printc(f'\tUse tf: {use_tf}', 'CYAN')
 
