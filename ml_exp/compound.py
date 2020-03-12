@@ -154,7 +154,7 @@ class Compound:
         size: compound size.
         """
         self.ei = epsilon_index(self.am,
-                                bonds_i,
+                                self.bonds_i,
                                 size=size)
 
     def gen_bob(self,
