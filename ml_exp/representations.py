@@ -215,7 +215,8 @@ def adjacency_matrix(bonds_i,
                      bonds_k,
                      bonds_f,
                      use_forces=False,
-                     size=23):
+                     size=23,
+                     flatten=True):
     """
     Calculates the adjacency matrix given the bond list.
     bonds: list of bond names.
@@ -224,6 +225,7 @@ def adjacency_matrix(bonds_i,
     bonds_f: list of force values.
     use_forces: if the use of forces instead of k_cx should be used.
     size: compund size.
+    flatten: if the representation should be 1D.
     """
     if bonds_i is None:
         raise ValueError('The helping data hasn\'t been initialized for\
@@ -247,7 +249,10 @@ the current compound.')
                     am[i, j] = bonds_k[i]
                     am[j, i] = am[i, j]
 
-    return np.pad(am, ((0, size - n), (0, size - n)), 'constant')
+    if flatten:
+        return np.pad(am, ((0, size - n), (0, size - n)), 'constant').flatten()
+    else:
+        return np.pad(am, ((0, size - n), (0, size - n)), 'constant')
 
 
 def epsilon_index(am,
