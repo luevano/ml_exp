@@ -78,12 +78,14 @@ class Compound:
 
     def gen_cm(self,
                size=23,
+               sort=False,
                flatten=True,
                as_eig=True,
                bohr_ru=False):
         """
         Generate the Coulomb Matrix for the compund.
         size: compound size.
+        sort: if the representation should be sorted row-norm-wise.
         flatten: if the representation should be 1D.
         as_eig: if the representation should be as the eigenvalues.
         bohr_ru: if radius units should be in bohr's radius units.
@@ -91,15 +93,17 @@ class Compound:
         self.cm = coulomb_matrix(self.coordinates,
                                  self.nc,
                                  size=size,
+                                 sort=sort,
+                                 flatten=flatten,
                                  as_eig=as_eig,
-                                 bohr_ru=bohr_ru,
-                                 flatten=flatten)
+                                 bohr_ru=bohr_ru)
 
     def gen_ljm(self,
                 diag_value=None,
                 sigma=1.0,
                 epsilon=1.0,
                 size=23,
+                sort=False,
                 flatten=True,
                 as_eig=True,
                 bohr_ru=False):
@@ -109,6 +113,7 @@ class Compound:
         sigma: sigma value.
         epsilon: epsilon value.
         size: compound size.
+        sort: if the representation should be sorted row-norm-wise.
         flatten: if the representation should be 1D.
         as_eig: if the representation should be as the eigenvalues.
         bohr_ru: if radius units should be in bohr's radius units.
@@ -119,6 +124,7 @@ class Compound:
                                         sigma=sigma,
                                         epsilon=epsilon,
                                         size=size,
+                                        sort=sort,
                                         flatten=flatten,
                                         as_eig=as_eig,
                                         bohr_ru=bohr_ru)
@@ -142,11 +148,13 @@ class Compound:
     def gen_am(self,
                use_forces=False,
                size=23,
+               sort=False,
                flatten=True):
         """
         Generate the Adjacency Matrix for the compund.
         use_forces: if the use of forces instead of k_cx should be used.
         size: compound size.
+        sort: if the representation should be sorted row-norm-wise.
         flatten: if the representation should be 1D.
         """
         self.am = adjacency_matrix(self.bonds_i,
@@ -154,6 +162,7 @@ class Compound:
                                    self.bonds_f,
                                    use_forces=use_forces,
                                    size=size,
+                                   sort=sort,
                                    flatten=flatten)
 
     def gen_ei(self,

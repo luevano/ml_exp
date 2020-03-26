@@ -28,6 +28,7 @@ from ml_exp.data import POSSIBLE_BONDS
 def coulomb_matrix(coords,
                    nc,
                    size=23,
+                   sort=False,
                    flatten=True,
                    as_eig=True,
                    bohr_ru=False):
@@ -36,6 +37,7 @@ def coulomb_matrix(coords,
     coords: compound coordinates.
     nc: nuclear charge data.
     size: compound size.
+    sort: if the representation should be sorted row-norm-wise.
     flatten: if the representation should be 1D.
     as_eig: if the representation should be as the eigenvalues.
     bohr_ru: if radius units should be in bohr's radius units.
@@ -77,6 +79,10 @@ size. Arrays are not of the right shape.')
 
         return np.pad(cm_eigs, (0, size - n), 'constant')
     else:
+        if sort:
+            si = np.argsort(np.linalg.norm(cm, axis=-1))[::-1]
+            cm = cm[si]
+
         if flatten:
             return np.pad(cm, ((0, size - n), (0, size - n)),
                           'constant').flatten()
@@ -90,6 +96,7 @@ def lennard_jones_matrix(coords,
                          sigma=1.0,
                          epsilon=1.0,
                          size=23,
+                         sort=False,
                          flatten=True,
                          as_eig=True,
                          bohr_ru=False):
@@ -101,6 +108,7 @@ def lennard_jones_matrix(coords,
     sigma: sigma value.
     epsilon: epsilon value.
     size: compound size.
+    sort: if the representation should be sorted row-norm-wise.
     flatten: if the representation should be 1D.
     as_eig: if the representation should be as the eigenvalues.
     bohr_ru: if radius units should be in bohr's radius units.
@@ -149,6 +157,10 @@ size. Arrays are not of the right shape.')
 
         return np.pad(lj_eigs, (0, size - n), 'constant')
     else:
+        if sort:
+            si = np.argsort(np.linalg.norm(lj, axis=-1))[::-1]
+            lj = lj[si]
+
         if flatten:
             return np.pad(lj, ((0, size - n), (0, size - n)),
                           'constant').flatten()
@@ -216,6 +228,7 @@ def adjacency_matrix(bonds_i,
                      bonds_f,
                      use_forces=False,
                      size=23,
+                     sort=False,
                      flatten=True):
     """
     Calculates the adjacency matrix given the bond list.
@@ -225,6 +238,7 @@ def adjacency_matrix(bonds_i,
     bonds_f: list of force values.
     use_forces: if the use of forces instead of k_cx should be used.
     size: compund size.
+    sort: if the representation should be sorted row-norm-wise.
     flatten: if the representation should be 1D.
     """
     if bonds_i is None:
@@ -248,6 +262,10 @@ the current compound.')
                 else:
                     am[i, j] = bonds_k[i]
                     am[j, i] = am[i, j]
+
+    if sort:
+        si = np.argsort(np.linalg.norm(am, axis=-1))
+        am = am[si]
 
     if flatten:
         return np.pad(am, ((0, size - n), (0, size - n)), 'constant').flatten()
