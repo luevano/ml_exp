@@ -30,7 +30,8 @@ except ImportError:
     print('Tensorflow couldn\'t be imported. Maybe it is not installed.')
     TF_AV = False
 from ml_exp.misc import printc
-from ml_exp.kernels import laplauss_kernel
+from ml_exp.kernels import gaussian_kernel, laplacian_kernel,\
+    wasserstein_kernel
 from ml_exp.readdb import qm7db
 
 
