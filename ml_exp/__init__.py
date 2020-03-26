@@ -25,7 +25,7 @@ from ml_exp.representations import coulomb_matrix, lennard_jones_matrix,\
         get_helping_data, adjacency_matrix, epsilon_index, check_bond, bag_of_bonds
 from ml_exp.readdb import qm7db, qm9db
 from ml_exp.data import NUCLEAR_CHARGE, POSSIBLE_BONDS
-from ml_exp.kernels import laplauss_kernel
+from ml_exp.kernels import gaussian_kernel, laplauss_kernel, wasserstein_kernel
 from ml_exp.krr import krr, multi_krr
 
 __all__ = ['Compound',
@@ -38,7 +38,9 @@ __all__ = ['Compound',
            'bag_of_bonds',
            'qm7db',
            'qm9db',
-           'laplauss_kernel',
+           'gaussian_kernel',
+           'laplacian_kernel',
+           'wasserstein_kernel',
            'krr',
            'multi_krr',
            'NUCLEAR_CHARGE',
