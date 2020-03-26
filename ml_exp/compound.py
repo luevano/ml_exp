@@ -92,7 +92,8 @@ class Compound:
                                  self.nc,
                                  size=size,
                                  as_eig=as_eig,
-                                 bohr_ru=bohr_ru)
+                                 bohr_ru=bohr_ru,
+                                 flatten=flatten)
 
     def gen_ljm(self,
                 diag_value=None,
@@ -118,6 +119,7 @@ class Compound:
                                         sigma=sigma,
                                         epsilon=epsilon,
                                         size=size,
+                                        flatten=flatten,
                                         as_eig=as_eig,
                                         bohr_ru=bohr_ru)
 
@@ -139,8 +141,8 @@ class Compound:
 
     def gen_am(self,
                use_forces=False,
-               flatten=True,
-               size=23):
+               size=23,
+               flatten=True):
         """
         Generate the Adjacency Matrix for the compund.
         use_forces: if the use of forces instead of k_cx should be used.
@@ -151,7 +153,8 @@ class Compound:
                                    self.bonds_k,
                                    self.bonds_f,
                                    use_forces=use_forces,
-                                   size=size)
+                                   size=size,
+                                   flatten=flatten)
 
     def gen_ei(self,
                size=23):
