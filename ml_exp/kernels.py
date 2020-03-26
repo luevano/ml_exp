@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
-from scipy.stats import wasserstein_distance
+from scipy.stats import wasserstein_distance as was_dist
 try:
     import tensorflow as tf
     TF_AV = True
@@ -163,7 +163,8 @@ def wasserstein_kernel(X1,
 
     K = np.zeros((X1_size, X2_size), dtype=np.float64)
     for i in range(X1_size):
-        norm = np.array([X2[j] - X1[i] for j in range(X2_size)], dtype=np.float64)
+        norm = np.array([was_dist(X1[i], X2[j]) for j in range(X2_size)],
+                        dtype=np.float64)
         K[i, :] = np.exp(- alpha * norm)
 
     return K
