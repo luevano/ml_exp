@@ -181,7 +181,7 @@ class Compound:
         """
         Generate the Bag of Bonds for the compound.
         sort: if the representation should be sorted bag-wise.
-        acount: atom count for the compound.
+        acount: atom count for the compound, defaults to qm7 sizes.
         NOTE: 'cm' shouldn't be sorted by row-norm since 'atoms' isn't (sorted).
         """
         self.bob = bag_of_bonds(self.cm,
