@@ -360,7 +360,7 @@ def multi_krr(db_path='data',
                                   test_size=test_size,
                                   sigma=sigma,
                                   identifier='LJM',
-                                  laplauss='gaussian',
+                                  kernel='gaussian',
                                   use_tf=use_tf,
                                   show_msgs=show_msgs)
     if 'AM' in identifiers:
@@ -370,7 +370,7 @@ def multi_krr(db_path='data',
                                 test_size=test_size,
                                 sigma=sigma,
                                 identifier='AM',
-                                laplauss='gaussian',
+                                kernel='gaussian',
                                 use_tf=use_tf,
                                 show_msgs=show_msgs)
     if 'BOB' in identifiers:
@@ -380,7 +380,7 @@ def multi_krr(db_path='data',
                                   test_size=test_size,
                                   sigma=sigma,
                                   identifier='BOB',
-                                  laplauss='laplacian',
+                                  kernel='laplacian',
                                   use_tf=use_tf,
                                   show_msgs=show_msgs)
 
