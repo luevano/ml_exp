@@ -42,7 +42,7 @@ def krr(descriptors,
         sigma=1000.0,
         opt=True,
         identifier=None,
-        laplauss='gauss',
+        kernel='gaussian',
         use_tf=True,
         show_msgs=True):
     """
@@ -55,6 +55,7 @@ def krr(descriptors,
     sigma: depth of the kernel.
     opt: if the optimized algorithm should be used. For benchmarking purposes.
     identifier: string with the name of the descriptor used.
+    kernel: which kernel to use.
     use_tf: if tensorflow should be used.
     show_msgs: if debug messages should be shown.
     NOTE: identifier is just a string and is only for identification purposes.
@@ -98,11 +99,26 @@ def krr(descriptors,
             with tf.device('GPU:0'):
                 X_tr = descriptors[:training_size]
                 Y_tr = labels[:training_size]
-                K_tr = laplauss_kernel(X_tr,
-                                       X_tr,
-                                       sigma,
-                                       laplauss=laplauss,
-                                       use_tf=use_tf)
+                if kernel == 'gaussian':
+                    K_tr = gaussian_kernel(X_tr,
+                                           X_tr,
+                                           sigma,
+                                           use_tf=use_tf)
+
+                elif kernel == 'laplacian':
+                    K_tr = laplacian_kernel(X_tr,
+                                            X_tr,
+                                            sigma,
+                                            use_tf=use_tf)
+
+                elif kernel == 'wasserstein':
+                    K_tr = wasserstein_kernel(X_tr,
+                                              X_tr,
+                                              sigma,
+                                              use_tf=use_tf)
+
+                else:
+                    raise TypeError(f'{kernel} kernel not found.')
 
                 # Adding a small value on the diagonal for cho_solve.
                 dv = tf.linalg.tensor_diag(tf.constant(1e-8,
@@ -115,11 +131,26 @@ def krr(descriptors,
 
                 X_te = descriptors[-test_size:]
                 Y_te = labels[-test_size:]
-                K_te = laplauss_kernel(X_te,
-                                       X_tr,
-                                       sigma,
-                                       laplauss=laplauss,
-                                       use_tf=use_tf)
+                if kernel == 'gaussian':
+                    K_te = gaussian_kernel(X_te,
+                                           X_tr,
+                                           sigma,
+                                           use_tf=use_tf)
+
+                elif kernel == 'laplacian':
+                    K_te = laplacian_kernel(X_te,
+                                            X_tr,
+                                            sigma,
+                                            use_tf=use_tf)
+
+                elif kernel == 'wasserstein':
+                    K_te = wasserstein_kernel(X_te,
+                                              X_tr,
+                                              sigma,
+                                              use_tf=use_tf)
+
+                else:
+                    raise TypeError(f'{kernel} kernel not found.')
 
                 Y_te = tf.expand_dims(Y_te, 1)
                 Y_pr = tf.tensordot(K_te, alpha, 1)
@@ -130,11 +161,26 @@ def krr(descriptors,
     else:
         X_tr = descriptors[:training_size]
         Y_tr = labels[:training_size]
-        K_tr = laplauss_kernel(X_tr,
-                               X_tr,
-                               sigma,
-                               laplauss=laplauss,
-                               use_tf=use_tf)
+        if kernel == 'gaussian':
+            K_tr = gaussian_kernel(X_tr,
+                                   X_tr,
+                                   sigma,
+                                   use_tf=use_tf)
+
+        elif kernel == 'laplacian':
+            K_tr = laplacian_kernel(X_tr,
+                                    X_tr,
+                                    sigma,
+                                    use_tf=use_tf)
+
+        elif kernel == 'wasserstein':
+            K_tr = wasserstein_kernel(X_tr,
+                                      X_tr,
+                                      sigma,
+                                      use_tf=use_tf)
+
+        else:
+            raise TypeError(f'{kernel} kernel not found.')
 
         # Adding a small value on the diagonal for cho_solve.
         K_tr[np.diag_indices_from(K_tr)] += 1e-8
@@ -143,11 +189,26 @@ def krr(descriptors,
 
         X_te = descriptors[-test_size:]
         Y_te = labels[-test_size:]
-        K_te = laplauss_kernel(X_te,
-                               X_tr,
-                               sigma,
-                               laplauss=laplauss,
-                               use_tf=use_tf)
+        if kernel == 'gaussian':
+            K_te = gaussian_kernel(X_te,
+                                   X_tr,
+                                   sigma,
+                                   use_tf=use_tf)
+
+        elif kernel == 'laplacian':
+            K_te = laplacian_kernel(X_te,
+                                    X_tr,
+                                    sigma,
+                                    use_tf=use_tf)
+
+        elif kernel == 'wasserstein':
+            K_te = wasserstein_kernel(X_te,
+                                      X_tr,
+                                      sigma,
+                                      use_tf=use_tf)
+
+        else:
+            raise TypeError(f'{kernel} kernel not found.')
         Y_pr = np.dot(K_te, alpha)
 
         mae = np.mean(np.abs(Y_pr - Y_te))
@@ -168,8 +229,10 @@ def multi_krr(db_path='data',
               lj_sigma=1.0,
               lj_epsilon=1.0,
               use_forces=False,
-              stuff='bonds',
+              acount={'C':7, 'H':16, 'N':3, 'O':3, 'S':1},
               size=23,
+              sort=False,
+              flatten=True,
               as_eig=True,
               bohr_ru=False,
               training_size=1500,
@@ -187,8 +250,10 @@ def multi_krr(db_path='data',
     lj_sigma: sigma value.
     lj_epsilon: epsilon value.
     use_forces: if the use of forces instead of k_cx should be used.
-    stuff: elements of the bag, by default the known bag of bonds.
+    acount: atom count for the compound, defaults to qm7 sizes.
     size: compound size.
+    sort: if the representation should be sorted row-norm or bag-wise.
+    flatten: if the representation should be 1D.
     as_eig: if the representation should be as the eigenvalues.
     bohr_ru: if radius units should be in bohr's radius units.
     training_size: size of the training set to use.
@@ -224,6 +289,8 @@ def multi_krr(db_path='data',
     for compound in compounds:
         if 'CM' in identifiers:
             compound.gen_cm(size=size,
+                            sort=sort,
+                            flatten=flatten,
                             as_eig=as_eig,
                             bohr_ru=bohr_ru)
         if 'LJM' in identifiers:
@@ -231,15 +298,21 @@ def multi_krr(db_path='data',
                              sigma=lj_sigma,
                              epsilon=lj_epsilon,
                              size=size,
+                             sort=sort,
+                             flatten=flatten,
                              as_eig=as_eig,
                              bohr_ru=bohr_ru)
         if 'AM' in identifiers:
             compound.gen_hd(size=size,
                             bohr_ru=bohr_ru)
             compound.gen_am(use_forces=use_forces,
-                            size=size)
+                            size=size,
+                            sort=sort,
+                            flatten=flatten)
         if 'BOB' in identifiers:
-            compound.gen_bob(size=size)
+            compound.gen_bob(size=size,
+                             sort=sort,
+                             acount=acount)
 
     # Create a numpy array (or tensorflow tensor) for the descriptors.
     if 'CM' in identifiers:
@@ -272,45 +345,45 @@ def multi_krr(db_path='data',
 
     # ML calculation.
     if 'CM' in identifiers:
-        cm_mae, cm_tictoc = simple_ml(cm_data,
-                                      energy_pbe0,
-                                      training_size=training_size,
-                                      test_size=test_size,
-                                      sigma=sigma,
-                                      identifier='CM',
-                                      laplauss='gauss',
-                                      use_tf=use_tf,
-                                      show_msgs=show_msgs)
+        cm_mae, cm_tictoc = krr(cm_data,
+                                energy_pbe0,
+                                training_size=training_size,
+                                test_size=test_size,
+                                sigma=sigma,
+                                identifier='CM',
+                                kernel='gaussian',
+                                use_tf=use_tf,
+                                show_msgs=show_msgs)
     if 'LJM' in identifiers:
-        ljm_mae, ljm_tictoc = simple_ml(ljm_data,
-                                        energy_pbe0,
-                                        training_size=training_size,
-                                        test_size=test_size,
-                                        sigma=sigma,
-                                        identifier='LJM',
-                                        laplauss='gauss',
-                                        use_tf=use_tf,
-                                        show_msgs=show_msgs)
+        ljm_mae, ljm_tictoc = krr(ljm_data,
+                                  energy_pbe0,
+                                  training_size=training_size,
+                                  test_size=test_size,
+                                  sigma=sigma,
+                                  identifier='LJM',
+                                  laplauss='gaussian',
+                                  use_tf=use_tf,
+                                  show_msgs=show_msgs)
     if 'AM' in identifiers:
-        am_mae, am_tictoc = simple_ml(am_data,
-                                      energy_pbe0,
-                                      training_size=training_size,
-                                      test_size=test_size,
-                                      sigma=sigma,
-                                      identifier='AM',
-                                      laplauss='gauss',
-                                      use_tf=use_tf,
-                                      show_msgs=show_msgs)
+        am_mae, am_tictoc = krr(am_data,
+                                energy_pbe0,
+                                training_size=training_size,
+                                test_size=test_size,
+                                sigma=sigma,
+                                identifier='AM',
+                                laplauss='gaussian',
+                                use_tf=use_tf,
+                                show_msgs=show_msgs)
     if 'BOB' in identifiers:
-        bob_mae, bob_tictoc = simple_ml(bob_data,
-                                        energy_pbe0,
-                                        training_size=training_size,
-                                        test_size=test_size,
-                                        sigma=sigma,
-                                        identifier='BOB',
-                                        laplauss='laplace',
-                                        use_tf=use_tf,
-                                        show_msgs=show_msgs)
+        bob_mae, bob_tictoc = krr(bob_data,
+                                  energy_pbe0,
+                                  training_size=training_size,
+                                  test_size=test_size,
+                                  sigma=sigma,
+                                  identifier='BOB',
+                                  laplauss='laplacian',
+                                  use_tf=use_tf,
+                                  show_msgs=show_msgs)
 
     # End of program
     end_time = time.perf_counter()
