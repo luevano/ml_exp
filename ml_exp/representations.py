@@ -356,7 +356,7 @@ Use non-eigenvalue representation.')
                 else:
                     bag = ''.join(sorted([atom_i, atom_j]))
 
-            bags[bag][1].append(cm[i, j])
+                bags[bag][1].append(cm[i, j])
 
     # Change to a numpy array and add padding.
     for bag in bags.keys():

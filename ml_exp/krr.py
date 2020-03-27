@@ -91,7 +91,7 @@ def krr(descriptors,
         printc(f'\tTraining size: {training_size}', 'CYAN')
         printc(f'\tTest size: {test_size}', 'CYAN')
         printc(f'\tSigma: {sigma}', 'CYAN')
-        printc(f'\tKernel: {laplauss}', 'CYAN')
+        printc(f'\tKernel: {kernel}', 'CYAN')
         printc(f'\tUse tf: {use_tf}', 'CYAN')
 
     if use_tf:
@@ -310,8 +310,7 @@ def multi_krr(db_path='data',
                             sort=sort,
                             flatten=flatten)
         if 'BOB' in identifiers:
-            compound.gen_bob(size=size,
-                             sort=sort,
+            compound.gen_bob(sort=sort,
                              acount=acount)
 
     # Create a numpy array (or tensorflow tensor) for the descriptors.
