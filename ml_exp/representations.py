@@ -316,7 +316,7 @@ def bag_of_bonds(cm,
     cm: coulomb matrix.
     atoms: list of atoms.
     sort: if the representation should be sorted bag-wise.
-    acount: atom count for the compound.
+    acount: atom count for the compound, defaults to qm7 sizes.
     NOTE: 'cm' shouldn't be sorted by row-norm since 'atoms' isn't (sorted).
     """
     if cm is None:
