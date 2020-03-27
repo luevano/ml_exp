@@ -307,96 +307,64 @@ the current compound.')
     return ei
 
 
-def check_bond(bags,
-               bond):
-    """
-    Checks if a bond is in a bag.
-    bags: list of bags, containing a bag per entry, which in turn
-        contains a list of bond-values.
-    bond: bond to check.
-    """
-    if bags == []:
-        return False, None
-
-    for i, bag in enumerate(bags):
-        if bag[0] == bond:
-            return True, i
-
-    return False, None
-
-
 def bag_of_bonds(cm,
                  atoms,
-                 size=23):
+                 sort=False,
+                 acount={'C':7, 'H':16, 'N':3, 'O':3, 'S':1}):
     """
     Creates the Bag of Bonds using the Coulomb Matrix.
     cm: coulomb matrix.
     atoms: list of atoms.
-    size: compound size.
+    sort: if the representation should be sorted bag-wise.
+    acount: atom count for the compound.
+    NOTE: 'cm' shouldn't be sorted by row-norm since 'atoms' isn't (sorted).
     """
     if cm is None:
         raise ValueError('Coulomb Matrix hasn\'t been initialized for the \
 current compound.')
 
-    if cm.ndim == 1:
-        raise ValueError('Coulomb Matrix (CM) dimension is 1. Maybe it was \
-generated as the vector of eigenvalues, try (re-)generating the CM.')
+    if cm.ndim == 1 and cm.shape[0] < 30:
+        raise ValueError('CM was generated as the vector of eigenvalues. \
+Use non-eigenvalue representation.')
 
-    n = len(atoms)
+    # Base bags.
+    ackeys = list(acount.keys())
+    bags = dict()
+    for i, atom_i in enumerate(ackeys):
+        for j, atom_j in enumerate(ackeys[i:]):
+            # Add current bond to bags.
+            if j == 0:
+                bags[atom_i] = [acount[atom_i], []]
+                if acount[atom_i] > 1:
+                    bsize = np.int32((acount[atom_i]**2 - acount[atom_i])/2)
+                    bags[''.join(sorted([atom_i, atom_j]))] = [bsize, []]
+            else:
+                bags[''.join(sorted([atom_i, atom_j]))] = [acount[atom_i] *
+                                                           acount[atom_j], []]
 
-    if size < n:
-        print('Error. Compound size (n) is greater than (size). Using (n)',
-              'instead of (size).')
-        size = n
+    bond_size = 0
+    for b in bags.keys():
+        bond_size += bags[b][0]
 
-    # Bond max length, calculated using only the upper triangular matrix.
-    bond_size = np.int32((size * size - size)/2 + size)
-
-    # List where each bag data is stored.
-    bags = []
+    # Adding actual values to the bags.
     for i, atom_i in enumerate(atoms):
         for j, atom_j in enumerate(atoms):
-            # Work only in the upper triangle of the coulomb matrix.
+            # Operate on the upper triangular matrix and get the current bond.
             if j >= i:
-                # Get the string of the current bond.
-                if i == j:
-                    current_bond = atom_i
+                if j == i:
+                    bag = atom_i
                 else:
-                    current_bond = ''.join(sorted([atom_i, atom_j]))
+                    bag = ''.join(sorted([atom_i, atom_j]))
 
-                # Check if that bond is already in a bag.
-                checker = check_bond(bags, current_bond)
-                # Either create a new bag or add values to an existing one.
-                if not checker[0]:
-                    bags.append([current_bond, cm[i, j]])
-                else:
-                    bags[checker[1]].append(cm[i, j])
+            bags[bag][1].append(cm[i, j])
 
-    # Create the actual bond list ordered.
-    atom_counter = Counter(atoms)
-    atom_list = sorted(list(set(atoms)))
-    bonds = []
-    for i, a_i in enumerate(atom_list):
-        if atom_counter[a_i] > 1:
-            for a_j in atom_list[i:]:
-                bonds.append(''.join(sorted([a_i, a_j])))
-    bonds = atom_list + bonds
-
-    # Create the final vector for the bob.
-    bob = np.zeros(bond_size, dtype=np.float64)
-    c_i = 0
-    for i, bond in enumerate(bonds):
-        checker = check_bond(bags, bond)
-        if checker[0]:
-            for j, num in enumerate(sorted(bags[checker[1]][1:])[::-1]):
-                # Use c_i as the index for bob if the zero padding should
-                # be at the end of the vector instead of between each bond.
-                # bob[i*size + j] = num
-                bob[c_i] = num
-                c_i += 1
+    # Change to a numpy array and add padding.
+    for bag in bags.keys():
+        if sort:
+            b = np.sort(np.array(bags[bag][1]))[::-1]
         else:
-            print(f'Error. Bond {bond} from bond list coudn\'t be found',
-                  'in the bags list. This could be a case where the atom',
-                  'is only present oncce in the molecule.')
+            b = np.array(bags[bag][1])
+        b = np.pad(b, (0, bags[bag][0] - b.shape[0]), 'constant')
+        bags[bag][1] = b
 
-    return bob
+    return np.concatenate([bags[bag][1] for bag in bags.keys()])

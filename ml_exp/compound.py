@@ -176,14 +176,18 @@ class Compound:
                                 size=size)
 
     def gen_bob(self,
-                size=23):
+                sort=False,
+                acount={'C':7, 'H':16, 'N':3, 'O':3, 'S':1}):
         """
         Generate the Bag of Bonds for the compound.
-        size: compound size.
+        sort: if the representation should be sorted bag-wise.
+        acount: atom count for the compound.
+        NOTE: 'cm' shouldn't be sorted by row-norm since 'atoms' isn't (sorted).
         """
         self.bob = bag_of_bonds(self.cm,
                                 self.atoms,
-                                size=size)
+                                sort=sort,
+                                acount=acount)
 
     def read_xyz(self,
                  filename,
