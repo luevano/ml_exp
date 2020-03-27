@@ -345,7 +345,7 @@ generated as the vector of eigenvalues, try (re-)generating the CM.')
     n = len(atoms)
 
     if size < n:
-        print('Error. Compound size (n) is greater han (size). Using (n)',
+        print('Error. Compound size (n) is greater than (size). Using (n)',
               'instead of (size).')
         size = n
 
