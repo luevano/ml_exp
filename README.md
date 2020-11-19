@@ -4,6 +4,8 @@ This is an exploration of ML models for use in prediction of atomization energie
 
 An implementation of most of the ML routine is created from the, mostly, ground up.
 
+* Mostly, the main program is in **ml_exp**, and a new exploration on **other_exp**.
+
 ## Data used
 
 * The *QM7* dataset obtained from the [QML tutorial repository](https://github.com/qmlcode/tutorial). This can also be retrieved from the [quantum-machine webpage](http://www.quantum-machine.org/datasets/), but for its use with python, the dataset given by QML is more useful.
