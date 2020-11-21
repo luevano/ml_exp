@@ -2,11 +2,9 @@ import tensorflow as tf
 from tensorflow.compat.v1 import placeholder
 from tensorflow.compat.v1.layers import dense
 
-
 # Disable eager execution (evaluate tf operations instantly instead of having
 # to build a graph) so placeholder() can work.
 tf.compat.v1.disable_eager_execution()
-
 
 n_nodes = 50
 n_features = 50
@@ -44,6 +42,3 @@ Y_pred = tf.reshape(Y_pred, [-1])
 loss = tf.reduce_mean(Y_truth*tf.math.log(Y_pred + 1.0 ** -5))
 
 print(loss)
-
-
-print(tf.__version__)
